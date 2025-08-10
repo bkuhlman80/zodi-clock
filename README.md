@@ -1,30 +1,18 @@
-# Helio‑Geo Zodiac Clock
+# Helio‑Geo Zodiac Clock (phase‑aligned)
 
-A standalone Web Component that shows Sun and Moon tropical positions with animated and frozen modes. Ready for GitHub Pages.
+Visual speeds:
+- Tropical year = **123.7 seconds**
+- Lunar synodic month = **10 seconds**
 
-## Quick deploy (GitHub Pages)
+Implementation detail:
+- Moon longitude = Sun longitude + synodic phase × 360°
+- Anchored to real new moon epoch (2000‑01‑06 18:14 UTC) so Full ≈ 180° on the correct dates.
 
-1. Create a new public repo named **helio-geo-zodiac** on your GitHub account.
-2. Download these files and add them to the repo root:
-   - `index.html`
-   - `preview.png`
-3. Edit `index.html` and replace **YOUR_GITHUB_USERNAME** in the Open Graph tags with your username.
-4. Commit and push to the **main** branch.
-5. In the repo Settings → **Pages**:
-   - Source: **Deploy from a branch**
-   - Branch: **main** / **root**
-6. Wait 1–2 minutes. Your site will be live at:
-   - `https://YOUR_GITHUB_USERNAME.github.io/helio-geo-zodiac/`
-7. Test link previews (OG tags) with one of:
-   - Facebook Sharing Debugger: https://developers.facebook.com/tools/debug/
-   - Twitter Card Validator: https://cards-dev.twitter.com/validator
-   - iMessage/SMS preview usually updates after the first fetch; you may need to change the `?v=1754777249` cache‑buster on `og:image` if it’s cached.
+## Deploy to GitHub Pages
 
-## Local run
-
-Just open `index.html` in a modern browser. No build step.
-
-## Notes
-
-- This is an illustrative clock. Astronomy is approximate.
-- 0° Aries is at the top of the ring. Sun year speed can be set to 12h or 1h; Moon completes an orbit every 60s.
+1. Create a public repo `helio-geo-zodiac`.
+2. Upload `index.html` and `preview.png` to the repo root.
+3. Edit `index.html`: replace `YOUR_GITHUB_USERNAME` in the OG tags.
+4. Commit to `main` and enable Settings → Pages → Deploy from a branch → `main` / root.
+5. Share `https://YOUR_GITHUB_USERNAME.github.io/helio-geo-zodiac/`.
+6. If previews cache, bump the `?v=2` on `og:image`.
