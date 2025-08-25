@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+
+  <script defer src="https://cdn.jsdelivr.net/npm/astronomy-engine/astronomy.browser.min.js"></script>
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -47,6 +50,14 @@
     function moonPhaseFrac(d){ const dtDays=(d-NEW_MOON_REF)/DAY; return mod(dtDays,MOON_SYNODIC_DAYS)/MOON_SYNODIC_DAYS; } // 0..1
     function moonLongitudeDegPhase(d, sunLon){ return mod(sunLon + moonPhaseFrac(d)*360, 360); }
 
+function preciseLongitudes(date) {
+  if (typeof Astronomy === 'undefined') return null;
+  // Sun: apparent true ecliptic-of-date (tropical) longitude, as seen from Earth
+  const sunLon = Astronomy.SunPosition(date).elon;                 // degrees 0..360
+  // Moon: geocentric ecliptic-of-date longitude
+  const moonLon = Astronomy.EclipticGeoMoon(date).elon;            // degrees 0..360
+  return { sunLon, moonLon };
+}
     function toSceneAngle(deg){ return (-(deg) + 90) * Math.PI/180; } // 0° Aries at top, clockwise
     function ringHit(cx,cy,R, sx,sy, angle){ const dx=Math.cos(angle), dy=Math.sin(angle); const ox=sx-cx, oy=sy-cy; const a=dx*dx+dy*dy, b=2*(ox*dx+oy*dy), c=ox*ox+oy*oy - R*R; const disc=b*b-4*a*c; const t=disc>=0?(-b+Math.sqrt(disc))/(2*a):0; return {x:sx+t*dx,y:sy+t*dy}; }
     function phaseName(age){ const p=age/MOON_SYNODIC_DAYS; if(p<0.03) return "New"; if(p<0.22) return "Waxing Crescent"; if(p<0.28) return "First Quarter"; if(p<0.47) return "Waxing Gibbous"; if(p<0.53) return "Full"; if(p<0.72) return "Waning Gibbous"; if(p<0.78) return "Last Quarter"; if(p<0.97) return "Balsamic"; return "New"; }
@@ -88,12 +99,12 @@
           </div>
           <div class="cards">
             <div class="card">
-              <div class="small">Sun line — Lit</div>
+              <div class="small">Sun line</div>
               <div class="big" id="sunLabel">—</div>
               <div class="small">Ray from Earth through the Sun to the tropical ring.</div>
             </div>
             <div class="card">
-              <div class="small">Moon line — Jam</div>
+              <div class="small">Moon line</div>
               <div class="big" id="moonLabel">—</div>
               <div class="small">Phase: <span id="phaseLabel">—</span></div>
             </div>
@@ -154,8 +165,15 @@
         resetNow.onclick=(e)=>{ e.preventDefault(); virtualNowMs=Date.now(); };
 
         const updateScene=(d)=>{
-          const sunLon=sunLongitudeDeg(d);
-          const moonLon=moonLongitudeDegPhase(d, sunLon);
+          let sunLon, moonLon;
+            if (mode === 'frozen') {
+              const p = preciseLongitudes(d);
+              if (p) { sunLon = p.sunLon; moonLon = p.moonLon; }
+              else   { sunLon = sunLongitudeDeg(d); moonLon = moonLongitudeDegPhase(d, sunLon); } // fallback
+            } else {
+              sunLon = sunLongitudeDeg(d);
+              moonLon = moonLongitudeDegPhase(d, sunLon);
+            }
           const sunSign=SIGNS[signIndex(sunLon)]; const moonSign=SIGNS[signIndex(moonLon)];
           const mAge=moonPhaseAgeDays(d); const mPhase=phaseName(mAge);
           const thetaEarth=toSceneAngle(mod(sunLon+180,360)); const ex=cx+R_earth*Math.cos(thetaEarth), ey=cy+R_earth*Math.sin(thetaEarth);
