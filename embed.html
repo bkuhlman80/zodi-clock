@@ -3,80 +3,39 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Helio‑Geo Zodiac Clock — Embed</title>
+  <title>Helio-Geo Zodiac Clock — Embed</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+
+  <!-- Scripts -->
   <script defer src="https://cdn.jsdelivr.net/npm/astronomy-engine/astronomy.browser.min.js"></script>
-  <style>body{margin:0;background:#0f1218;color:#e6e7eb;font-family:ui-sans-serif,system-ui}</style>
+  <script defer src="./clock.js"></script>
+
+  <!-- Slim host styling -->
+  <style>
+    html,body { margin:0; background:#0f1218; color:#e6e7eb;
+                font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
+  </style>
 </head>
 <body>
+  <!-- The component reads attributes set below (mode/dt/controls/labels) -->
   <helio-geo-zodiac-clock style="display:block;width:100%;max-width:2000px;"></helio-geo-zodiac-clock>
 
   <script>
-  // tiny param helper
-  const p = new URLSearchParams(location.search);
-  const initialMode   = p.get('mode') || 'frozen';         // animated|frozen
-  const dtParam       = p.get('dt');                       // ISO string
-  const controlsParam = p.get('controls') || '0';          // 0 hide, 1 show
-  const labelsParam   = p.get('labels')   || '1';          // 0 hide sign labels
-  // monkey-patch after custom element upgrades
-  customElements.whenDefined('helio-geo-zodiac-clock').then(()=>{
-    const el = document.querySelector('helio-geo-zodiac-clock');
-    // expose a few knobs via attributes the component reads (added below)
-    el.setAttribute('embed', '1');
-    el.setAttribute('controls', controlsParam);
-    el.setAttribute('labels', labelsParam);
-    el.setAttribute('initial-mode', initialMode);
-    if (dtParam) el.setAttribute('initial-dt', dtParam);
-  });
-  </script>
+    // Read URL params and pass to the component as attributes
+    const p = new URLSearchParams(location.search);
+    const initialMode = p.get("mode") || "frozen";          // "animated" | "frozen"
+    const dtParam     = p.get("dt");                        // ISO string (UTC), e.g. 2025-08-19T03:11:00Z
+    const controls    = p.get("controls") ?? "0";           // "0" hide controls (default) | "1" show
+    const labels      = p.get("labels")   ?? "1";           // "1" show labels (default) | "0" hide
 
-  <script>
-  // Wrap your existing component logic, with small hooks for embed attributes
-  (function(){
-    /* --- copy your current component code here verbatim --- */
-    /* minimal additions: read attributes to hide controls/labels and set initial mode/date */
-    const SIGNS=[ "Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces" ];
-    /* …helpers (unchanged)… */
-
-    class HelioGeoZodiacClock extends HTMLElement{
-      constructor(){ super(); this.attachShadow({mode:'open'}); }
-      connectedCallback(){ this.render(); }
-      disconnectedCallback(){ cancelAnimationFrame(this._raf); }
-
-      render(){
-        const embed   = this.getAttribute('embed') === '1';
-        const controls= this.getAttribute('controls') !== '0';
-        const labels  = this.getAttribute('labels') !== '0';
-        const root = document.createElement('div');
-        root.innerHTML = `
-          <style>/* keep your styles; optionally shrink paddings for embed */</style>
-          <div class="controls" style="${controls ? '' : 'display:none'}">
-            <!-- same controls as index.html -->
-          </div>
-          <div class="canvas">
-            <svg id="scene" viewBox="0 0 800 800" aria-label="Helio-Geo Zodiac Diagram"></svg>
-          </div>`;
-        this.shadowRoot.innerHTML = ''; this.shadowRoot.appendChild(root);
-        this.afterRender({labels});
-      }
-
-      afterRender(opts){
-        const labelsOn = !!(opts && opts.labels);
-        /* build SVG … */
-        // when drawing ring labels:
-        for(let i=0;i<12;i++){
-          /* spokes */
-          if (labelsOn) { /* draw SIGNS[i] text */ }
-        }
-        /* rest identical to index.html, including preciseLongitudes + frozen logic */
-        /* also seed initial mode/date from attributes: */
-        const initialMode = this.getAttribute('initial-mode') || 'frozen';
-        const initialDt   = this.getAttribute('initial-dt');
-        /* set defaults… */
-      }
-    }
-    customElements.define('helio-geo-zodiac-clock', HelioGeoZodiacClock);
-  })();
+    customElements.whenDefined("helio-geo-zodiac-clock").then(() => {
+      const el = document.querySelector("helio-geo-zodiac-clock");
+      el.setAttribute("embed", "1");
+      el.setAttribute("controls", controls);
+      el.setAttribute("labels", labels);
+      el.setAttribute("initial-mode", initialMode);
+      if (dtParam) el.setAttribute("initial-dt", dtParam);
+    });
   </script>
 </body>
 </html>
