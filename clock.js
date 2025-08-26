@@ -29,21 +29,14 @@
   }
 
   // Precise Frozen mode (Astronomy Engine)
-// Precise Frozen mode (Astronomy Engine)
 function preciseLongitudes(d){
   if (!window.Astronomy) return null;
-  try {
-    const t = new Astronomy.AstroTime(d);
-    // Sun MUST use SunPosition().elon (apparent ecliptic-of-date)
-    const sunLon  = Astronomy.SunPosition(t).elon;
-    // Moon can use ecliptic longitude helper
-    const moonLon = Astronomy.EclipticLongitude(Astronomy.Body.Moon, t);
-    return { sunLon, moonLon };
-  } catch (e) {
-    console.error("preciseLongitudes failed:", e);
-    return null; // fall back to fast math
-  }
+  const t = new Astronomy.AstroTime(d);
+  const sunLon  = Astronomy.SunPosition(t).elon;          // apparent ecliptic-of-date (geocentric)
+  const moonLon = Astronomy.EclipticGeoMoon(t).elon;      // geocentric ecliptic-of-date
+  return { sunLon, moonLon };
 }
+
 
 
   function toSceneAngle(deg){ return (-(deg) + 90) * Math.PI / 180; } // 0° Aries at top, clockwise
