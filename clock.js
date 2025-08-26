@@ -45,7 +45,7 @@ function preciseLongitudes(d){
 }
 
 
-  function toSceneAngle(deg){ return (-(deg) + 90) * Math.PI / 180; } // 0° Aries at top, clockwise
+  function toSceneAngle(deg){ return (-(deg) - 90) * Math.PI / 180; } // 0° Aries at top, clockwise
   function ringHit(cx,cy,R, sx,sy, angle){
     const dx=Math.cos(angle), dy=Math.sin(angle);
     const ox=sx-cx, oy=sy-cy;
@@ -185,7 +185,7 @@ function preciseLongitudes(d){
       // static ring + labels
       circle(cx,cy,R_zodiac,{fill:"none",stroke:"#2a2f39",width:2});
       for(let i=0;i<12;i++){
-        const ang=(-i*30+90)*Math.PI/180;
+        const ang=(-i*30-90)*Math.PI/180;
         const x1=cx+R_zodiac*Math.cos(ang), y1=cy+R_zodiac*Math.sin(ang);
         line(cx,cy,x1,y1,{stroke:"#20242c",width:1});
         if (showLabels){
