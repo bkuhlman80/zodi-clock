@@ -1,20 +1,13 @@
 {
   "name": "helio-geo-zodiac",
   "version": "1.0.0",
-  "description": "The **Helio‑Geo Zodiac Clock** is an interactive web animation that visualizes the relationship between the Sun, Earth, and Moon within the tropical zodiac. It’s designed to be both visually compelling and phase-accurate for key lunar events.",
-  "main": "src/clock.js",
+  "private": true,
+  "description": "Helio-Geo Zodiac Clock",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
-  }
-}
-
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "vite": "^7.1.3"
   }
