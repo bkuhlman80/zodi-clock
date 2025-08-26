@@ -29,14 +29,14 @@
   }
 
   // Precise Frozen mode (Astronomy Engine)
-function preciseLongitudes(d) {
-  if (typeof Astronomy === 'undefined') return null;
+function preciseLongitudes(d){
+  if (!window.Astronomy) return null;
   const t = new Astronomy.AstroTime(d);
-  // Use the same function for Sun and Moon
-  const sunLon  = Astronomy.EclipticLongitude(Astronomy.Body.Sun,  t);
-  const moonLon = Astronomy.EclipticLongitude(Astronomy.Body.Moon, t);
+  const sunLon  = Astronomy.SunPosition(t).elon;                  // apparent ecliptic-of-date
+  const moonLon = Astronomy.EclipticLongitude(Astronomy.Body.Moon, t); // geocentric ecliptic-of-date
   return { sunLon, moonLon };
 }
+
 
   function toSceneAngle(deg){ return (-(deg) + 90) * Math.PI / 180; } // 0° Aries at top, clockwise
   function ringHit(cx,cy,R, sx,sy, angle){
