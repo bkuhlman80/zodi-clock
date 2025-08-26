@@ -61,6 +61,18 @@
   function moonPhaseAgeDays(d){ const dtDays=(d-NEW_MOON_REF)/DAY; return mod(dtDays,MOON_SYNODIC_DAYS); }
 
   class HelioGeoZodiacClock extends HTMLElement {
+            static get observedAttributes() {
+        return ["initial-mode", "initial-dt", "controls", "labels"];
+        }
+        attributeChangedCallback(name, oldV, newV) {
+        // switch state immediately when attrs arrive from embed.html
+        if (name === "initial-mode") {
+            this.mode = (newV === "frozen") ? "frozen" : "animated";
+        }
+        // Re-render so controls/labels/date reflect new attrs
+        if (this.isConnected) this.render();
+        }
+
     constructor(){
       super();
       this.attachShadow({ mode: "open" });
@@ -195,15 +207,18 @@
       if (resetNow){ resetNow.onclick=(e)=>{ e.preventDefault(); this.virtualNowMs=Date.now(); }; }
 
       // initialize datetime-local
-      if (dtInput){
-        if (attrDt){
-          dtInput.value = attrDt.replace("Z","").slice(0,16);
-        } else {
-          const now=new Date();
-          const iso=new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString().slice(0,16);
-          dtInput.value=iso;
-        }
-      }
+            if (dtInput) {
+            const attrDt = this.getAttribute("initial-dt");
+            if (attrDt) {
+                dtInput.value = attrDt.replace("Z","").slice(0,16);
+            } else {
+                const now = new Date();
+                const iso = new Date(now.getTime()-now.getTimezoneOffset()*60000)
+                            .toISOString().slice(0,16);
+                dtInput.value = iso;
+            }
+            }
+
 
       const updateScene = (d)=>{
         let sunLon, moonLon;
