@@ -29,12 +29,20 @@
   }
 
   // Precise Frozen mode (Astronomy Engine)
+// Precise Frozen mode (Astronomy Engine)
 function preciseLongitudes(d){
   if (!window.Astronomy) return null;
-  const t = new Astronomy.AstroTime(d);
-  const sunLon  = Astronomy.SunPosition(t).elon;                  // apparent ecliptic-of-date
-  const moonLon = Astronomy.EclipticLongitude(Astronomy.Body.Moon, t); // geocentric ecliptic-of-date
-  return { sunLon, moonLon };
+  try {
+    const t = new Astronomy.AstroTime(d);
+    // Sun MUST use SunPosition().elon (apparent ecliptic-of-date)
+    const sunLon  = Astronomy.SunPosition(t).elon;
+    // Moon can use ecliptic longitude helper
+    const moonLon = Astronomy.EclipticLongitude(Astronomy.Body.Moon, t);
+    return { sunLon, moonLon };
+  } catch (e) {
+    console.error("preciseLongitudes failed:", e);
+    return null; // fall back to fast math
+  }
 }
 
 
