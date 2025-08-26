@@ -32,11 +32,12 @@
 function preciseLongitudes(d){
   if (!window.Astronomy) return null;
   const t = new Astronomy.AstroTime(d);
-  // Use the same family for both bodies: *Position(...).elon*
-  const sunLon  = Astronomy.SunPosition(t).elon;   // apparent ecliptic-of-date
-  const moonLon = Astronomy.MoonPosition(t).elon;  // geocentric ecliptic-of-date
+  const sunLon  = Astronomy.SunPosition(t).elon;                  // apparent ecliptic-of-date (geocentric)
+  const moonLon = Astronomy.EclipticLongitude(Astronomy.Body.Moon, t); // geocentric ecliptic-of-date
   return { sunLon, moonLon };
 }
+
+
   function toSceneAngle(deg){ return (-(deg) + 90) * Math.PI / 180; } // 0° Aries at top, clockwise
   function ringHit(cx,cy,R, sx,sy, angle){
     const dx=Math.cos(angle), dy=Math.sin(angle);
