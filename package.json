@@ -2,11 +2,12 @@
   "name": "helio-geo-zodiac",
   "version": "1.0.0",
   "private": true,
-  "description": "Helio-Geo Zodiac Clock",
+  "description": "The Helio-Geo Zodiac Clock visualizes Sun–Earth–Moon dynamics in the tropical zodiac.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npm run build && git add -A && git commit -m \"deploy $(date '+%Y-%m-%d %H:%M:%S')\" && git push origin main"
   },
   "devDependencies": {
     "vite": "^7.1.3"
