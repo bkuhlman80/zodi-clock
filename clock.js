@@ -145,7 +145,7 @@ function preciseLongitudes(d){
 
           <div class="canvas">
             <svg id="scene" viewBox="0 0 800 800" aria-label="Helio-Geo Zodiac Diagram"></svg>
-            <div class="legend">This is a clock, not a cosmology. Geocentric display, heliocentric physics. 0° Aries at top. | <a href="#" id="resetNow">reset to now</a></div>
+            <div class="legend">This is a (counter-)clock, not a cosmology. Geocentric display, heliocentric physics. 0° Aries at top. | <a href="#" id="resetNow">reset to now</a></div>
           </div>
         </div>
       `;
