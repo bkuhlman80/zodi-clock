@@ -33,18 +33,19 @@ function preciseLongitudes(d){
   if (!window.Astronomy) return null;
   const t = new Astronomy.AstroTime(d);
 
-  // Geocentric vectors (with aberration/light-time correction)
-  const sunVec  = Astronomy.GeoVector(Astronomy.Body.Sun,  t, /*aberration*/ true);
-  const moonVec = Astronomy.GeoVector(Astronomy.Body.Moon, t, /*aberration*/ true);
+  // Geocentric position vectors (with aberration correction)
+  const sunVec  = Astronomy.GeoVector(Astronomy.Body.Sun,  t, true);
+  const moonVec = Astronomy.GeoVector(Astronomy.Body.Moon, t, true);
 
-  // Convert vectors to ecliptic-of-date spherical coords
-  const sunEcl  = Astronomy.Ecliptic(sunVec);   // {elon, elat, dist}
-  const moonEcl = Astronomy.Ecliptic(moonVec);  // {elon, elat, dist}
+  // Convert to ecliptic-of-date spherical coords (elon = ecliptic longitude)
+  const sunEcl  = Astronomy.Ecliptic(sunVec);   // { elon, elat, dist }
+  const moonEcl = Astronomy.Ecliptic(moonVec);  // { elon, elat, dist }
 
   return { sunLon: sunEcl.elon, moonLon: moonEcl.elon };
 }
 
-  function toSceneAngle(deg){ return (-(deg) + 90) * Math.PI / 180; } // 0° Aries at top, clockwise
+
+  function toSceneAngle(deg){ return (-(deg) - 90) * Math.PI / 180; } // 0° Aries at top, clockwise
   function ringHit(cx,cy,R, sx,sy, angle){
     const dx=Math.cos(angle), dy=Math.sin(angle);
     const ox=sx-cx, oy=sy-cy;
@@ -184,7 +185,7 @@ function preciseLongitudes(d){
       // static ring + labels
       circle(cx,cy,R_zodiac,{fill:"none",stroke:"#2a2f39",width:2});
       for(let i=0;i<12;i++){
-        const ang=(-i*30+90)*Math.PI/180;
+        const ang=(-i*30-90)*Math.PI/180;
         const x1=cx+R_zodiac*Math.cos(ang), y1=cy+R_zodiac*Math.sin(ang);
         line(cx,cy,x1,y1,{stroke:"#20242c",width:1});
         if (showLabels){
