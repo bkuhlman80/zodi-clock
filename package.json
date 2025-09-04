@@ -2,7 +2,7 @@
   "name": "helio-geo-zodiac",
   "version": "1.0.0",
   "private": true,
-  "description": "The Helio-Geo Zodiac Clock visualizes Sun–Earth–Moon dynamics in the tropical zodiac.",
+  "description": "Z0DI Clock visualizes Sun–Earth–Moon dynamics in the tropical zodiac.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
