@@ -29,20 +29,20 @@
   }
 
   // Precise Frozen mode (Astronomy Engine)
-function preciseLongitudes(d){
-  if (!window.Astronomy) return null;
-  const t = new Astronomy.AstroTime(d);
+  function preciseLongitudes(d){
+    if (!window.Astronomy) return null;
+    const t = new Astronomy.AstroTime(d);
 
-  // Geocentric position vectors (with aberration correction)
-  const sunVec  = Astronomy.GeoVector(Astronomy.Body.Sun,  t, true);
-  const moonVec = Astronomy.GeoVector(Astronomy.Body.Moon, t, true);
+    // Geocentric position vectors (with aberration correction)
+    const sunVec  = Astronomy.GeoVector(Astronomy.Body.Sun,  t, true);
+    const moonVec = Astronomy.GeoVector(Astronomy.Body.Moon, t, true);
 
-  // Convert to ecliptic-of-date spherical coords (elon = ecliptic longitude)
-  const sunEcl  = Astronomy.Ecliptic(sunVec);   // { elon, elat, dist }
-  const moonEcl = Astronomy.Ecliptic(moonVec);  // { elon, elat, dist }
+    // Convert to ecliptic-of-date spherical coords (elon = ecliptic longitude)
+    const sunEcl  = Astronomy.Ecliptic(sunVec);   // { elon, elat, dist }
+    const moonEcl = Astronomy.Ecliptic(moonVec);  // { elon, elat, dist }
 
-  return { sunLon: sunEcl.elon, moonLon: moonEcl.elon };
-}
+    return { sunLon: sunEcl.elon, moonLon: moonEcl.elon };
+  }
 
 
   function toSceneAngle(deg){ return (-(deg) - 90) * Math.PI / 180; } // 0° Aries at top, clockwise
@@ -281,11 +281,12 @@ function preciseLongitudes(d){
     }
   }
 
-  if (!customElements.get("zodi-clock")) {
-    customElements.define("zodi-clock", HelioGeoZodiacClock);
-  }
-  // Back-compat alias (remove in a future major)
   if (!customElements.get("helio-geo-zodiac-clock")) {
     customElements.define("helio-geo-zodiac-clock", HelioGeoZodiacClock);
   }
+  if (!customElements.get("zodi-clock")) {
+    customElements.define("zodi-clock", HelioGeoZodiacClock);
+  }
+
+
 })();
