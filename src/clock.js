@@ -281,12 +281,16 @@
     }
   }
 
+  // Register legacy tag once
   if (!customElements.get("helio-geo-zodiac-clock")) {
     customElements.define("helio-geo-zodiac-clock", HelioGeoZodiacClock);
   }
+  // Alias tag must use a DISTINCT constructor
   if (!customElements.get("zodi-clock")) {
-    customElements.define("zodi-clock", HelioGeoZodiacClock);
+    class ZodiClockAlias extends HelioGeoZodiacClock {}
+    customElements.define("zodi-clock", ZodiClockAlias);
   }
+
 
 
 })();
