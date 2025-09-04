@@ -1,5 +1,5 @@
 {
-  "name": "helio-geo-zodiac",
+  "name": "zodi-clock",
   "version": "1.0.0",
   "private": true,
   "description": "Z0DI Clock visualizes Sun–Earth–Moon dynamics in the tropical zodiac.",

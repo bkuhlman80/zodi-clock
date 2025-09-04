@@ -4,7 +4,7 @@ The **Z0DI Clock** is an interactive web animation that visualizes the relations
 
 ## Embed 
 <iframe
-  src="https://bkuhlman80.github.io/helio-geo-zodiac/embed.html?mode=frozen&dt=2025-08-19T03:11:00Z&controls=0&labels=1"
+  src="https://bkuhlman80.github.io/zodi-clock/embed.html?mode=frozen&dt=2025-08-19T03:11:00Z&controls=0&labels=1"
   title="Z0DI Clock"
   width="100%" height="540" style="border:0;border-radius:12px;overflow:hidden" loading="lazy">
 </iframe>
@@ -47,8 +47,8 @@ This repo uses **Vite** to build static assets into the `/docs` folder, which Gi
 
 3. Visit the live site:
 
-   * Main page: [https://bkuhlman80.github.io/helio-geo-zodiac/](https://bkuhlman80.github.io/helio-geo-zodiac/)
-   * Embed view: [https://bkuhlman80.github.io/helio-geo-zodiac/embed.html](https://bkuhlman80.github.io/helio-geo-zodiac/embed.html)
+   * Main page: [https://bkuhlman80.github.io/zodi-clock/](https://bkuhlman80.github.io/zodi-clock/)
+   * Embed view: [https://bkuhlman80.github.io/zodi-clock/embed.html](https://bkuhlman80.github.io/zodi-clock/embed.html)
 
 ## Verification
 
@@ -56,7 +56,7 @@ This repo uses **Vite** to build static assets into the `/docs` folder, which Gi
 * You should see a script like:
 
   ```html
-  <script type="module" crossorigin src="/helio-geo-zodiac/clock-DofenHXy.js"></script>
+  <script type="module" crossorigin src="/zodi-clock/clock-DofenHXy.js"></script>
   ```
 * Each new build generates a different `[hash]`, ensuring browsers always pull the latest code.
 

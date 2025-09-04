@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 export default defineConfig({
-  base: '/helio-geo-zodiac/',
+  base: '/zodi-clock/',
   build: {
     outDir: 'docs',
     assetsDir: '',

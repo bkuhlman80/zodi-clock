@@ -19,7 +19,7 @@
 </head>
 <body>
   <!-- The component reads attributes set below (mode/dt/controls/labels) -->
-  <helio-geo-zodiac-clock style="display:block;width:100%;max-width:2000px;"></helio-geo-zodiac-clock>
+  <zodi-clock style="display:block;width:100%;max-width:2000px;"></zodi-clock>
 
   <script>
     // Read URL params and pass to the component as attributes
@@ -29,8 +29,8 @@
     const controls    = p.get("controls") ?? "0";           // "0" hide controls (default) | "1" show
     const labels      = p.get("labels")   ?? "1";           // "1" show labels (default) | "0" hide
 
-    customElements.whenDefined("helio-geo-zodiac-clock").then(() => {
-      const el = document.querySelector("helio-geo-zodiac-clock");
+    customElements.whenDefined("zodi-clock").then(() => {
+      const el = document.querySelector("zodi-clock");
       el.setAttribute("embed", "1");
       el.setAttribute("controls", controls);
       el.setAttribute("labels", labels);
