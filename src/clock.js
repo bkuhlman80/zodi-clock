@@ -21,15 +21,11 @@
   }
   async function loadEphemerisDaily(){
   try{
-    const bases = ['./ephemeris_daily.json','./public/ephemeris_daily.json','./docs/ephemeris_daily.json'];
-    let res, raw;
-    for (const b of bases) {
-      try {
-        res = await fetch(`${b}?v=${Date.now()}`, { cache:'no-store' });
-        if (res.ok) { raw = await res.json(); break; }
-      } catch {}
-    }
-    if (!raw) throw new Error('ephemeris_daily.json not found at any path');
+    const url = './ephemeris_daily.json?v=' + Date.now();   // this URL works in your browser
+    console.log('fetching ephemeris:', url);
+    const res = await fetch(url, { cache:'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw = await res.json();
 
     let asc  = typeof raw.node_asc_lon_deg==='number'  ? clamp360(raw.node_asc_lon_deg)  : null;
     let desc = typeof raw.node_desc_lon_deg==='number' ? clamp360(raw.node_desc_lon_deg) : null;
@@ -48,11 +44,11 @@
     };
     window.Z0DI = Object.assign(window.Z0DI||{}, { ephemDaily: EPHEM });
     console.log('Ephemeris loaded:', EPHEM);
-  } catch (e) {
-    console.warn(e.message);
+  } catch(e){
+    console.warn('ephemeris load failed:', e);
   }
 }
-  loadEphemerisDaily();
+loadEphemerisDaily();
 
   // ---- seasons helpers (Astronomy Engine) ----
   const SEASON_META = [
