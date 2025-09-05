@@ -136,7 +136,7 @@
   }
   function moonPhaseAgeDays(d){ const dtDays=(d-NEW_MOON_REF)/DAY; return mod(dtDays,MOON_SYNODIC_DAYS); }
 
-  class HelioGeoZodiacClock extends HTMLElement {
+  class ZodiClock extends HTMLElement {
             static get observedAttributes() {
         return ["initial-mode", "initial-dt", "controls", "labels"];
         }
@@ -262,43 +262,45 @@
           text(lx,ly,SIGNS[i],{size:13,fill:"#9aa0aa"});
         }
       }
+
       // ---- Seasons ring: four fixed spokes + chips ----
-      const R_season = R_zodiac + 44; // outside zodiac ring
-      const seasonsYear = (window.Astronomy ? seasonsUTC(new Date().getUTCFullYear()) : null);
-      window.Z0DI = Object.assign(window.Z0DI||{}, { seasonsYear });
+      const R_season = R_zodiac - 8;
 
-      // if ephemeris_daily lacks season info, derive it on the fly for proximity
-      let prox = { active:false, key:null, dateTag:null };
-      if (seasonsYear) {
-        const nowIso = new Date().toISOString();
-        const nxt = nextSeason(nowIso, seasonsYear);
-        const within3 = Math.abs(nxt.days) <= 3;
-        prox = {
-          active: within3,
-          key: nxt.key,
-          dateTag: nxt.when.toISOString().slice(0,10),
-        };
-      }
+      let seasonsYear = null;
+      function drawSeasons() {
+        if (!window.Astronomy) { setTimeout(drawSeasons, 200); return; }
+        seasonsYear = seasonsUTC(new Date().getUTCFullYear());
 
-      // draw spokes and chips
-      SEASON_META.forEach(sp => {
-        const ang = (-sp.lon - 90) * Math.PI/180;
-        const x1=cx+R_zodiac*Math.cos(ang), y1=cy+R_zodiac*Math.sin(ang);
-        const x2=cx+R_season*Math.cos(ang), y2=cy+R_season*Math.sin(ang);
-        line(x1,y1,x2,y2,{stroke:"#2a2f39",width:1.5});
-
-        // chip
-        const scale = prox.active && prox.key===sp.key ? 1.18 : 1.0;
-        const tx = cx+(R_season+18)*Math.cos(ang);
-        const ty = cy+(R_season+18)*Math.sin(ang);
-        const chip = text(tx,ty,sp.glyph,{size:12});
-        chip.setAttribute("transform",`translate(${tx},${ty}) scale(${scale}) translate(${-tx},${-ty})`);
-        chip.setAttribute("aria-label", sp.label); // a11y long label
-
-        if (prox.active && prox.key===sp.key) {
-          text(tx, ty+14*scale, prox.dateTag, { size:10, fill:"#9aa0aa" });
+        let prox = { active:false, key:null, dateTag:null };
+        if (seasonsYear) {
+          const nowIso = new Date().toISOString();
+          const nxt = nextSeason(nowIso, seasonsYear);
+          prox = {
+            active: Math.abs(nxt.days) <= 3,
+            key: nxt.key,
+            dateTag: nxt.when.toISOString().slice(0,10),
+          };
         }
-      });
+
+        SEASON_META.forEach(sp => {
+          const ang = (-sp.lon - 90) * Math.PI/180;
+          const x1=cx+R_season*Math.cos(ang), y1=cy+R_season*Math.sin(ang);
+          const x2=cx+(R_season-20)*Math.cos(ang), y2=cy+(R_season-20)*Math.sin(ang);
+          line(x1,y1,x2,y2,{stroke:"#2a2f39",width:1.5});
+
+          const scale = prox.active && prox.key===sp.key ? 1.18 : 1.0;
+          const tx = cx+(R_season-28)*Math.cos(ang);
+          const ty = cy+(R_season-28)*Math.sin(ang);
+          const chip = text(tx,ty,sp.glyph,{size:12});
+          chip.setAttribute("transform",`translate(${tx},${ty}) scale(${scale}) translate(${-tx},${-ty})`);
+          chip.setAttribute("aria-label", sp.label);
+
+          if (prox.active && prox.key===sp.key) {
+            text(tx, ty+14*scale, prox.dateTag, { size:10, fill:"#9aa0aa" });
+          }
+        });
+      }
+      drawSeasons();
 
       // ---- Node ring: thin circle + ☊ ☋ pins (static until next daily JSON) ----
       const R_nodes = R_zodiac - 28;                                    // thin inner ring
@@ -439,10 +441,8 @@
     }
   }
 
-  // Alias tag must use a DISTINCT constructor
-  if (!customElements.get("zodi-clock")) {
-    class ZodiClockAlias extends HelioGeoZodiacClock {}
-    customElements.define("zodi-clock", ZodiClockAlias);
-  }
+if (!customElements.get("zodi-clock")) {
+  customElements.define("zodi-clock", ZodiClock);
+}
 
 })();
