@@ -75,6 +75,10 @@
     const days = (when - now)/86400000;
     return { key, when, days };
   }
+  // glyphs + helpers for node labels
+  const SIGN_GLYPHS = ["♈︎","♉︎","♊︎","♋︎","♌︎","♍︎","♎︎","♏︎","♐︎","♑︎","♒︎","♓︎"];
+  function signGlyphFromLon(lon){ return SIGN_GLYPHS[signIndex(lon)]; }
+  function degInSignInt(lon){ return Math.floor(mod(lon,30)); }   // 0–29
 
   // Fast visuals (animated mode)
   function sunLongitudeDegFast(d){
@@ -262,7 +266,7 @@
       const R_season = R_zodiac + 44; // outside zodiac ring
       const seasonsYear = (window.Astronomy ? seasonsUTC(new Date().getUTCFullYear()) : null);
       window.Z0DI = Object.assign(window.Z0DI||{}, { seasonsYear });
-      
+
       // if ephemeris_daily lacks season info, derive it on the fly for proximity
       let prox = { active:false, key:null, dateTag:null };
       if (seasonsYear) {
@@ -295,6 +299,58 @@
           text(tx, ty+14*scale, prox.dateTag, { size:10, fill:"#9aa0aa" });
         }
       });
+
+      // ---- Node ring: thin circle + ☊ ☋ pins (static until next daily JSON) ----
+      const R_nodes = R_zodiac - 28;                                    // thin inner ring
+      const nodeRing = circle(cx, cy, R_nodes, { fill:"none", stroke:"#242a33", width:1 });
+
+      let ascPin=null, descPin=null, micro=null;
+      function showMicro(x,y,str,ms=1800){
+        if (micro) { svg.removeChild(micro); micro=null; }
+        micro = text(x, y-14, str, { size:11, fill:"#cbd1db" });
+        setTimeout(()=>{ if (micro) { svg.removeChild(micro); micro=null; } }, ms);
+      }
+
+      function renderNodesOnce(){
+        const E = (window.Z0DI && window.Z0DI.ephemDaily) ? window.Z0DI.ephemDaily : null;
+        if (!E || E.node_asc_lon_deg == null || E.node_desc_lon_deg == null) {
+          // try again shortly; loader runs async at startup
+          setTimeout(renderNodesOnce, 300);
+          return;
+        }
+
+        const nodes = [
+          { lon: E.node_asc_lon_deg, glyph:"☊", aria:`☊ ${degInSignInt(E.node_asc_lon_deg)}°${signGlyphFromLon(E.node_asc_lon_deg)}` },
+          { lon: E.node_desc_lon_deg, glyph:"☋", aria:`☋ ${degInSignInt(E.node_desc_lon_deg)}°${signGlyphFromLon(E.node_desc_lon_deg)}` },
+        ];
+
+        // draw pins
+        nodes.forEach((n, i)=>{
+          const ang = toSceneAngle(n.lon);
+          const x = cx + R_nodes*Math.cos(ang);
+          const y = cy + R_nodes*Math.sin(ang);
+          const pin = text(x, y, n.glyph, { size:16 });
+          pin.setAttribute("aria-label", n.aria);
+          if (i===0) ascPin = { x, y, lon:n.lon, glyph:n.glyph }; else descPin = { x, y, lon:n.lon, glyph:n.glyph };
+        });
+
+        // tap/hover → micro-label like “☊ 12°♉︎”
+        svg.addEventListener("click", (ev)=>{
+          const pt = svg.createSVGPoint(); pt.x = ev.offsetX; pt.y = ev.offsetY;
+          const hits = [ascPin, descPin].filter(Boolean).map(p=>{
+            const dx = pt.x - p.x, dy = pt.y - p.y; return { p, d2: dx*dx + dy*dy };
+          }).sort((a,b)=>a.d2-b.d2);
+          if (!hits.length) return;
+          const h = hits[0];
+          if (h.d2 <= 18*18) {
+            const sGlyph = signGlyphFromLon(h.p.lon);
+            const degStr = `${degInSignInt(h.p.lon)}°${sGlyph}`;
+            showMicro(h.p.x, h.p.y, `${h.p.glyph} ${degStr}`);
+          }
+        });
+      }
+      renderNodesOnce();
+
 
       // Sun
       circle(cx,cy,18,{fill:"#f5b301",stroke:"#0b0c10",width:2}); text(cx,cy-30,"Sun",{size:12,fill:"#9aa0aa"});
