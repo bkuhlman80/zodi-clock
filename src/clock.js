@@ -21,7 +21,7 @@
   }
   async function loadEphemerisDaily(){
   try{
-    const url = 'ephemeris_daily.json?v=' + Date.now();   // relative path for GitHub Pages
+    const url = './ephemeris_daily.json?v=' + Date.now();   // relative path for GitHub Pages
     const res = await fetch(url, { cache:'no-store' });
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const raw = await res.json();
