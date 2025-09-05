@@ -21,10 +21,15 @@
   }
   async function loadEphemerisDaily(){
   try{
-    const url = './ephemeris_daily.json?v=' + Date.now();   // relative path for GitHub Pages
-    const res = await fetch(url, { cache:'no-store' });
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const raw = await res.json();
+    const bases = ['./ephemeris_daily.json','./public/ephemeris_daily.json','./docs/ephemeris_daily.json'];
+    let res, raw;
+    for (const b of bases) {
+      try {
+        res = await fetch(`${b}?v=${Date.now()}`, { cache:'no-store' });
+        if (res.ok) { raw = await res.json(); break; }
+      } catch {}
+    }
+    if (!raw) throw new Error('ephemeris_daily.json not found at any path');
 
     let asc  = typeof raw.node_asc_lon_deg==='number'  ? clamp360(raw.node_asc_lon_deg)  : null;
     let desc = typeof raw.node_desc_lon_deg==='number' ? clamp360(raw.node_desc_lon_deg) : null;
@@ -42,10 +47,11 @@
       node_desc_sign: raw.node_desc_sign || (desc!=null ? signGlyphFromDeg(desc) : null),
     };
     window.Z0DI = Object.assign(window.Z0DI||{}, { ephemDaily: EPHEM });
-  }catch(e){
-    console.warn('ephemeris_daily.json missing or invalid; continuing without it.');
-    }
+    console.log('Ephemeris loaded:', EPHEM);
+  } catch (e) {
+    console.warn(e.message);
   }
+}
   loadEphemerisDaily();
 
   // ---- seasons helpers (Astronomy Engine) ----
