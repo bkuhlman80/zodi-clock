@@ -2,7 +2,7 @@
 
 The **Z0DI Clock** is an interactive web animation that visualizes the relationship between the Sun, Earth, and Moon within the tropical zodiac. It’s designed to be both visually compelling and phase-accurate for key lunar events.
 
-## Embed 
+## How to Embed 
 <iframe 
   src="https://bkuhlman80.github.io/zodi-clock/embed.html?mode=frozen&dt=2025-08-19T03:11:00Z&controls=0&labels=1" 
   title="Zodi Clock" 

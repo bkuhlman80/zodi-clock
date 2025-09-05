@@ -11,6 +11,42 @@
   function mod(n,m){ return ((n % m) + m) % m; }
   function toDegMin(x){ const d=Math.floor(x); const m=Math.floor((x-d)*60); return `${d}°${String(m).padStart(2,"0")}’`; }
   function signIndex(lon){ return Math.floor(mod(lon,360)/30); }
+  
+  // ---- ephemeris_daily loader (no module imports) ----
+  let EPHEM = null;
+  function clamp360(x){ return ((x % 360) + 360) % 360; }
+  function signGlyphFromDeg(deg){
+    const g=["♈︎","♉︎","♊︎","♋︎","♌︎","♍︎","♎︎","♏︎","♐︎","♑︎","♒︎","♓︎"];
+    return g[Math.floor(clamp360(deg)/30)];
+  }
+  async function loadEphemerisDaily(){
+    try{
+      const res = await fetch('/ephemeris_daily.json', { cache:'no-store' });
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const raw = await res.json();
+
+      let asc = typeof raw.node_asc_lon_deg==='number' ? clamp360(raw.node_asc_lon_deg) : null;
+      let desc = typeof raw.node_desc_lon_deg==='number'? clamp360(raw.node_desc_lon_deg): null;
+      if (asc==null && desc!=null) asc = clamp360(desc+180);
+      if (desc==null && asc!=null) desc = clamp360(asc+180);
+
+      EPHEM = {
+        iso_date: String(raw.iso_date || new Date().toISOString().slice(0,10)),
+        next_season_event: raw.next_season_event ?? null,
+        next_season_utc: raw.next_season_utc ?? null,
+        days_to_season: typeof raw.days_to_season==='number' ? raw.days_to_season : null,
+        node_asc_lon_deg: asc,
+        node_desc_lon_deg: desc,
+        node_asc_sign: raw.node_asc_sign || (asc!=null ? signGlyphFromDeg(asc) : null),
+        node_desc_sign: raw.node_desc_sign || (desc!=null ? signGlyphFromDeg(desc) : null),
+      };
+      window.Z0DI = Object.assign(window.Z0DI||{}, { ephemDaily: EPHEM });
+      console.log('Ephemeris loaded:', EPHEM);
+    }catch(e){
+      console.warn('ephemeris_daily.json missing or invalid; continuing without it.');
+    }
+  }
+  loadEphemerisDaily();
 
   // Fast visuals (animated mode)
   function sunLongitudeDegFast(d){
@@ -286,7 +322,5 @@
     class ZodiClockAlias extends HelioGeoZodiacClock {}
     customElements.define("zodi-clock", ZodiClockAlias);
   }
-
-
 
 })();
