@@ -11,7 +11,7 @@
   function mod(n,m){ return ((n % m) + m) % m; }
   function toDegMin(x){ const d=Math.floor(x); const m=Math.floor((x-d)*60); return `${d}°${String(m).padStart(2,"0")}’`; }
   function signIndex(lon){ return Math.floor(mod(lon,360)/30); }
-  
+
   // ---- ephemeris_daily loader (no module imports) ----
   let EPHEM = null;
   function clamp360(x){ return ((x % 360) + 360) % 360; }
@@ -47,6 +47,34 @@
     }
   }
   loadEphemerisDaily();
+
+  // ---- seasons helpers (Astronomy Engine) ----
+  const SEASON_META = [
+    { key: "MarEq", lon: 0,   glyph: "☉♈︎", label: "March Equinox"     },
+    { key: "JunSol",lon: 90,  glyph: "☉♋︎", label: "June Solstice"     },
+    { key: "SepEq", lon: 180, glyph: "☉♎︎", label: "September Equinox" },
+    { key: "DecSol",lon: 270, glyph: "☉♑︎", label: "December Solstice" },
+  ];
+
+  function seasonsUTC(year){
+    if (!window.Astronomy) return null;
+    const s = Astronomy.Seasons(year); // {march_equinox, june_solstice, ...}
+    const iso = t => t.date.toISOString().replace('.000Z','Z');
+    return {
+      MarEq:  iso(s.march_equinox),
+      JunSol: iso(s.june_solstice),
+      SepEq:  iso(s.september_equinox),
+      DecSol: iso(s.december_solstice),
+    };
+  }
+  function nextSeason(nowIso, yrSeasons){
+    const now = new Date(nowIso);
+    const entries = Object.entries(yrSeasons).map(([k,v])=>[k,new Date(v)]);
+    const future = entries.filter(([,dt])=>dt>now).sort((a,b)=>a[1]-b[1]);
+    const [key, when] = future.length ? future[0] : entries[0]; // wrap to next year if needed
+    const days = (when - now)/86400000;
+    return { key, when, days };
+  }
 
   // Fast visuals (animated mode)
   function sunLongitudeDegFast(d){
@@ -230,6 +258,44 @@
           text(lx,ly,SIGNS[i],{size:13,fill:"#9aa0aa"});
         }
       }
+      // ---- Seasons ring: four fixed spokes + chips ----
+      const R_season = R_zodiac + 44; // outside zodiac ring
+      const seasonsYear = (window.Astronomy ? seasonsUTC(new Date().getUTCFullYear()) : null);
+      window.Z0DI = Object.assign(window.Z0DI||{}, { seasonsYear });
+      
+      // if ephemeris_daily lacks season info, derive it on the fly for proximity
+      let prox = { active:false, key:null, dateTag:null };
+      if (seasonsYear) {
+        const nowIso = new Date().toISOString();
+        const nxt = nextSeason(nowIso, seasonsYear);
+        const within3 = Math.abs(nxt.days) <= 3;
+        prox = {
+          active: within3,
+          key: nxt.key,
+          dateTag: nxt.when.toISOString().slice(0,10),
+        };
+      }
+
+      // draw spokes and chips
+      SEASON_META.forEach(sp => {
+        const ang = (-sp.lon - 90) * Math.PI/180;
+        const x1=cx+R_zodiac*Math.cos(ang), y1=cy+R_zodiac*Math.sin(ang);
+        const x2=cx+R_season*Math.cos(ang), y2=cy+R_season*Math.sin(ang);
+        line(x1,y1,x2,y2,{stroke:"#2a2f39",width:1.5});
+
+        // chip
+        const scale = prox.active && prox.key===sp.key ? 1.18 : 1.0;
+        const tx = cx+(R_season+18)*Math.cos(ang);
+        const ty = cy+(R_season+18)*Math.sin(ang);
+        const chip = text(tx,ty,sp.glyph,{size:12});
+        chip.setAttribute("transform",`translate(${tx},${ty}) scale(${scale}) translate(${-tx},${-ty})`);
+        chip.setAttribute("aria-label", sp.label); // a11y long label
+
+        if (prox.active && prox.key===sp.key) {
+          text(tx, ty+14*scale, prox.dateTag, { size:10, fill:"#9aa0aa" });
+        }
+      });
+
       // Sun
       circle(cx,cy,18,{fill:"#f5b301",stroke:"#0b0c10",width:2}); text(cx,cy-30,"Sun",{size:12,fill:"#9aa0aa"});
       // Earth orbit
