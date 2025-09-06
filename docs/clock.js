@@ -239,7 +239,7 @@ loadEphemerisDaily();
       this.shadowRoot.appendChild(root);
       this.afterRender();
     }
-    
+
     afterRender() {
       const svg = this.shadowRoot.getElementById("scene");
       const btnAnimated = this.shadowRoot.getElementById("btnAnimated");
@@ -422,97 +422,14 @@ loadEphemerisDaily();
 
       updateScene(new Date());
       this._raf = requestAnimationFrame(loop);
-    }
-
-      // Sun
-      circle(cx,cy,18,{fill:"#f5b301",stroke:"#0b0c10",width:2}); text(cx,cy-30,"Sun",{size:12,fill:"#9aa0aa"});
-      // Earth orbit
-      circle(cx,cy,R_earth,{fill:"none",stroke:"#1f2937",width:1.5});
-      // dynamic bodies
-      const earthEl=circle(cx+R_earth,cy,11,{fill:"#3b82f6",stroke:"#0b0c10",width:1.5}); const earthLbl=text(cx+R_earth,cy-18,"Earth",{size:11,fill:"#9aa0aa"});
-      const moonOrbitEl=circle(cx+R_earth,cy,R_moon,{fill:"none",stroke:"#2a2f39",width:1});
-      const moonEl=circle(cx+R_earth+R_moon,cy,6,{fill:"#9aa3af",stroke:"#0b0c10",width:1}); const moonLbl=text(cx+R_earth+R_moon,cy-12,"Moon",{size:10,fill:"#9aa0aa"});
-      // Rays + hits
-      const sunRay=line(cx+R_earth,cy,cx+R_earth,cy,{stroke:"#f5b301",width:2.5}); const moonRay=line(cx+R_earth,cy,cx+R_earth,cy,{stroke:"#9aa3af",width:2,dash:"4 3"});
-      const sunHit=circle(cx,cy,5,{fill:"#f5b301"}); const moonHit=circle(cx,cy,5,{fill:"#9aa3af"});
-
-      // controls and defaults
-      if (btnAnimated && btnFrozen){
-        if (this.mode === "animated") btnAnimated.classList.add("active"); else btnFrozen.classList.add("active");
-        btnAnimated.onclick=()=>{ this.mode="animated"; btnAnimated.classList.add("active"); btnFrozen.classList.remove("active"); if (dateGroup) dateGroup.style.display="none"; };
-        btnFrozen.onclick =()=>{ this.mode="frozen";  btnFrozen .classList.add("active"); btnAnimated.classList.remove("active"); if (dateGroup) dateGroup.style.display="flex"; };
-      }
-      if (resetNow){ resetNow.onclick=(e)=>{ e.preventDefault(); this.virtualNowMs=Date.now(); }; }
-
-      // initialize datetime-local
-            if (dtInput) {
-            const attrDt = this.getAttribute("initial-dt");
-            if (attrDt) {
-                dtInput.value = attrDt.replace("Z","").slice(0,16);
-            } else {
-                const now = new Date();
-                const iso = new Date(now.getTime()-now.getTimezoneOffset()*60000)
-                            .toISOString().slice(0,16);
-                dtInput.value = iso;
-            }
-            }
-
-
-      const updateScene = (d)=>{
-        let sunLon, moonLon;
-        if (this.mode === "frozen"){
-          const p = preciseLongitudes(d);
-          if (p){ sunLon=p.sunLon; moonLon=p.moonLon; }
-          else  { sunLon = sunLongitudeDegFast(d); moonLon = moonLongitudeDegPhase(d, sunLon); }
-        } else {
-          sunLon = sunLongitudeDegFast(d);
-          moonLon = moonLongitudeDegPhase(d, sunLon);
-        }
-
-        const sunSign=SIGNS[signIndex(sunLon)], moonSign=SIGNS[signIndex(moonLon)];
-        const mAge=moonPhaseAgeDays(d), mPhase=phaseName(mAge);
-
-        const thetaEarth=toSceneAngle(mod(sunLon+180,360));
-        const ex=cx+R_earth*Math.cos(thetaEarth), ey=cy+R_earth*Math.sin(thetaEarth);
-        earthEl.setAttribute("cx",ex); earthEl.setAttribute("cy",ey); earthLbl.setAttribute("x",ex); earthLbl.setAttribute("y",ey-18);
-
-        const thetaMoon=toSceneAngle(moonLon);
-        const mx=ex+R_moon*Math.cos(thetaMoon), my=ey+R_moon*Math.sin(thetaMoon);
-        moonEl.setAttribute("cx",mx); moonEl.setAttribute("cy",my); moonLbl.setAttribute("x",mx); moonLbl.setAttribute("y",my-12);
-        moonOrbitEl.setAttribute("cx",ex); moonOrbitEl.setAttribute("cy",ey);
-
-        const sunAng=Math.atan2(cy-ey, cx-ex); const moonAng=Math.atan2(my-ey, mx-ex);
-        const sh=ringHit(cx,cy,R_zodiac, ex,ey, sunAng); const mh=ringHit(cx,cy,R_zodiac, ex,ey, moonAng);
-        sunRay.setAttribute("x1",ex); sunRay.setAttribute("y1",ey); sunRay.setAttribute("x2",sh.x); sunRay.setAttribute("y2",sh.y);
-        moonRay.setAttribute("x1",ex); moonRay.setAttribute("y1",ey); moonRay.setAttribute("x2",mh.x); moonRay.setAttribute("y2",mh.y);
-        sunHit.setAttribute("cx",sh.x); sunHit.setAttribute("cy",sh.y); moonHit.setAttribute("cx",mh.x); moonHit.setAttribute("cy",mh.y);
-
-        if (sunLabel)  sunLabel.textContent = `${sunSign} ${toDegMin(mod(sunLon,30))}`;
-        if (moonLabel) moonLabel.textContent= `${moonSign} ${toDegMin(mod(moonLon,30))}`;
-        if (phaseLabel)phaseLabel.textContent= mPhase;
-        if (nowLabel)  nowLabel.textContent  = d.toISOString().replace("T"," ").slice(0,19);
-      };
-
-      const loop = ()=>{
-        if (this.mode === "animated"){
-          const yearMs = 123.7*1000;                 // 123.7 s / year
-          const scale  = (YEAR_DAYS*DAY)/yearMs;     // single scale; Moon ratio comes from phase tie
-          this.virtualNowMs += 16.67 * scale;        // ~60 fps step
-          updateScene(new Date(this.virtualNowMs));
-        } else {
-          const d = dtInput && dtInput.value ? new Date(dtInput.value) : new Date();
-          updateScene(d);
-        }
-        this._raf = requestAnimationFrame(loop);
-      };
-
-      updateScene(new Date());
+            updateScene(new Date());
       this._raf = requestAnimationFrame(loop);
-    }
+    } // end of afterRender
+  }   // end of class ZodiClock
+
+  // register the custom element once
+  if (!customElements.get("zodi-clock")) {
+    customElements.define("zodi-clock", ZodiClock);
   }
 
-if (!customElements.get("zodi-clock")) {
-  customElements.define("zodi-clock", ZodiClock);
-}
-
-})();
+})(); // end IIFE
