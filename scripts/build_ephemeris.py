@@ -30,8 +30,6 @@ next_season = next((lab, dt) for lab, dt in pairs if dt > now)
 days_to = (next_season[1] - now).total_seconds()/86400.0
 
 
-
-# --- Lunar nodes: nearest ascending across a wide window, with debug
 # --- Lunar nodes: nearest ascending across a wide window
 nodes_start = ts.from_datetime(now - timedelta(days=365*3))
 nodes_end   = ts.from_datetime(now + timedelta(days=365*3))
@@ -67,20 +65,22 @@ if asc_time is not None:
 else:
     asc_lon = 0.0
     print("[nodes] no ascending node found; using 0.0")
+# after computing asc_lon float
+asc_lon = asc_lon % 360.0
+if asc_lon < 1e-6:        # avoid exact 0.000 at cusp
+    asc_lon = 360.0 - 1e-6
 
-assert 0.0 <= asc_lon < 360.0, f"asc_lon out of range: {asc_lon}"
 desc_lon = (asc_lon + 180.0) % 360.0
-
 
 out = {
   "iso_date": now.date().isoformat(),
   "next_season_event": next_season[0],
   "next_season_utc": next_season[1].isoformat().replace("+00:00","Z"),
   "days_to_season": round(days_to, 3),
-  "node_asc_lon_deg": round(asc_lon, 3) if asc_lon is not None else None,
-  "node_desc_lon_deg": round(desc_lon, 3) if desc_lon is not None else None,
-  "node_asc_sign": sign_glyph(asc_lon) if asc_lon is not None else None,
-  "node_desc_sign": sign_glyph(desc_lon) if desc_lon is not None else None,
+  "node_asc_lon_deg": round(asc_lon, 6),     # was 3
+  "node_desc_lon_deg": round(desc_lon, 6),   # was 3
+  "node_asc_sign": sign_glyph(asc_lon),
+  "node_desc_sign": sign_glyph(desc_lon),
 }
 
 OUT.write_text(json.dumps(out, separators=(",",":")) + "\n", encoding="utf-8")
