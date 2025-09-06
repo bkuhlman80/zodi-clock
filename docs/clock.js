@@ -301,6 +301,7 @@ console.log('Z0DI clock js loaded v=20250906-3');
     }
 
     afterRender() {
+      const ns = "http://www.w3.org/2000/svg";
       const svg = this.shadowRoot.getElementById("scene");
       const btnAnimated = this.shadowRoot.getElementById("btnAnimated");
       const btnFrozen   = this.shadowRoot.getElementById("btnFrozen");
@@ -347,7 +348,6 @@ console.log('Z0DI clock js loaded v=20250906-3');
       })();
 
       // svg helpers
-      const ns = "http://www.w3.org/2000/svg";
       const line=(x1,y1,x2,y2,opts={})=>{ const el=document.createElementNS(ns,"line"); el.setAttribute("x1",x1); el.setAttribute("y1",y1); el.setAttribute("x2",x2); el.setAttribute("y2",y2); if(opts.stroke) el.setAttribute("stroke",opts.stroke); if(opts.width) el.setAttribute("stroke-width",opts.width); if(opts.dash) el.setAttribute("stroke-dasharray",opts.dash); svg.appendChild(el); return el; };
       const circle=(x,y,r,opts={})=>{ const el=document.createElementNS(ns,"circle"); el.setAttribute("cx",x); el.setAttribute("cy",y); el.setAttribute("r",r); if(opts.fill) el.setAttribute("fill",opts.fill); if(opts.stroke) el.setAttribute("stroke",opts.stroke); if(opts.width) el.setAttribute("stroke-width",opts.width); svg.appendChild(el); return el; };
       const text=(x,y,str,opts={})=>{ const el=document.createElementNS(ns,"text"); el.setAttribute("x",x); el.setAttribute("y",y); el.setAttribute("fill",opts.fill||"#e6e7eb"); el.setAttribute("font-size",opts.size||12); el.setAttribute("text-anchor",opts.anchor||"middle"); el.setAttribute("dominant-baseline","middle"); el.textContent=str; svg.appendChild(el); return el; };
@@ -375,8 +375,8 @@ console.log('Z0DI clock js loaded v=20250906-3');
         if (!window.Astronomy || !Astronomy.Seasons) { setTimeout(drawSeasons,300); return; }
         const yr  = seasonsUTC(new Date().getUTCFullYear());
         const nxt = nextSeason(new Date().toISOString(), yr);
-        const prox = Number.isFinite(nxt.days) && Math.abs(nxt.days)<=3;
-        
+        const proxActive = Number.isFinite(nxt.days) && Math.abs(nxt.days) <= 3;
+
         const MONTH = { MarEq:"Mar", JunSol:"Jun", SepEq:"Sep", DecSol:"Dec" };
         SEASON_META.forEach(sp => {
           const ang = (-sp.lon - 90) * Math.PI/180;
