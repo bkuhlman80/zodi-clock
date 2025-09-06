@@ -1,4 +1,4 @@
-console.log('Z0DI clock js loaded v=20250905-3');
+console.log('Z0DI clock js loaded v=20250906-3');
 
 (function () {
   // ---------- constants & helpers ----------
@@ -8,7 +8,9 @@ console.log('Z0DI clock js loaded v=20250905-3');
   ];
   const MS = 1000, DAY = 86400 * MS, YEAR_DAYS = 365.24219, MOON_SYNODIC_DAYS = 29.530588853;
   const NEW_MOON_REF = new Date(Date.UTC(2000, 0, 6, 18, 14, 0)); // real new moon epoch
+  const VS_TEXT = "\uFE0E"; // text presentation selector
 
+  function txt(g){ return g + VS_TEXT; }
   function marchEquinoxApprox(y){ return new Date(Date.UTC(y,2,20,21,0,0)); }
   function mod(n,m){ return ((n % m) + m) % m; }
   function toDegMin(x){ const d=Math.floor(x); const m=Math.floor((x-d)*60); return `${d}°${String(m).padStart(2,"0")}’`; }
@@ -33,6 +35,10 @@ console.log('Z0DI clock js loaded v=20250905-3');
     let desc = typeof raw.node_desc_lon_deg==='number' ? clamp360(raw.node_desc_lon_deg) : null;
     if (asc==null && desc!=null) asc  = clamp360(desc+180);
     if (desc==null && asc!=null) desc = clamp360(asc+180);
+      if (asc!=null && desc!=null) {
+        const diff = Math.abs(((desc - asc + 540) % 360) - 180);
+        if (diff > 1) desc = clamp360(asc + 180);   // fix 0/360 or wrong pairs
+      }
 
     EPHEM = {
       iso_date: String(raw.iso_date || new Date().toISOString().slice(0,10)),
@@ -54,11 +60,12 @@ loadEphemerisDaily();
 
   // ---- seasons helpers (Astronomy Engine) ----
   const SEASON_META = [
-    { key: "MarEq", lon: 0,   glyph: "☉♈︎", label: "March Equinox"     },
-    { key: "JunSol",lon: 90,  glyph: "☉♋︎", label: "June Solstice"     },
-    { key: "SepEq", lon: 180, glyph: "☉♎︎", label: "September Equinox" },
-    { key: "DecSol",lon: 270, glyph: "☉♑︎", label: "December Solstice" },
+    { key:"MarEq", lon:0,   glyph: txt("☉")+txt("♈"), label:"March Equinox" },
+    { key:"JunSol",lon:90,  glyph: txt("☉")+txt("♋"), label:"June Solstice" },
+    { key:"SepEq", lon:180, glyph: txt("☉")+txt("♎"), label:"September Equinox" },
+    { key:"DecSol",lon:270, glyph: txt("☉")+txt("♑"), label:"December Solstice" },
   ];
+
 
   function seasonsUTC(year){
     if (!window.Astronomy || !Astronomy.Seasons) return null;
@@ -94,7 +101,7 @@ loadEphemerisDaily();
 
 
   // glyphs + helpers for node labels
-  const SIGN_GLYPHS = ["♈︎","♉︎","♊︎","♋︎","♌︎","♍︎","♎︎","♏︎","♐︎","♑︎","♒︎","♓︎"];
+  const SIGN_GLYPHS = ["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"].map(txt);
   function signGlyphFromLon(lon){ return SIGN_GLYPHS[signIndex(lon)]; }
   function degInSignInt(lon){ return Math.floor(mod(lon,30)); }   // 0–29
 
@@ -254,8 +261,8 @@ loadEphemerisDaily();
       const nowLabel  = this.shadowRoot.getElementById("nowLabel");
 
       const W=800,H=800,cx=W/2,cy=H/2, R_zodiac=350, R_earth=170, R_moon=50;
-      const R_nodes  = R_earth + 12;              // node ring ~1cm outside Earth orbit
-      const R_season = Math.round(R_earth * 2/3); // seasons ring inside Earth orbit
+      const R_nodes  = R_earth + R_moon;             
+      const R_season = R_earth;                      
 
       // svg helpers
       const ns = "http://www.w3.org/2000/svg";
@@ -283,63 +290,76 @@ loadEphemerisDaily();
 
       // ---- Seasons ring: four fixed spokes + chips on inner ring (2/3 Earth orbit)
       function drawSeasons(){
-        if (!window.Astronomy || !Astronomy.Seasons) { setTimeout(drawSeasons, 300); return; }
-        const yr = seasonsUTC(new Date().getUTCFullYear());
+        if (!window.Astronomy || !Astronomy.Seasons) { setTimeout(drawSeasons,300); return; }
+        const yr  = seasonsUTC(new Date().getUTCFullYear());
         const nxt = nextSeason(new Date().toISOString(), yr);
-        const proxActive = Number.isFinite(nxt.days) && Math.abs(nxt.days) <= 3;
+        const prox = Number.isFinite(nxt.days) && Math.abs(nxt.days)<=3;
 
-        SEASON_META.forEach(sp => {
+        SEASON_META.forEach(sp=>{
           const ang = (-sp.lon - 90) * Math.PI/180;
+          // tick mark on Earth orbit
           const x1=cx+R_season*Math.cos(ang), y1=cy+R_season*Math.sin(ang);
-          const x2=cx+(R_season-18)*Math.cos(ang), y2=cy+(R_season-18)*Math.sin(ang);
+          const x2=cx+(R_season-14)*Math.cos(ang), y2=cy+(R_season-14)*Math.sin(ang);
           line(x1,y1,x2,y2,{stroke:"#2a2f39",width:1.5});
 
-          const scale = proxActive && nxt.key===sp.key ? 1.18 : 1.0;
-          const tx = cx+(R_season-26)*Math.cos(ang);
-          const ty = cy+(R_season-26)*Math.sin(ang);
-          const chip = text(tx,ty,sp.glyph,{size:12});
+          // glyph on orbit
+          const tx=cx+(R_season-22)*Math.cos(ang);
+          const ty=cy+(R_season-22)*Math.sin(ang);
+          const scale = prox && nxt.key===sp.key ? 1.18 : 1.0;
+          const chip = text(tx,ty,sp.glyph,{size:12,fill:"#cbd1db"});
           chip.setAttribute("transform",`translate(${tx},${ty}) scale(${scale}) translate(${-tx},${-ty})`);
-          chip.setAttribute("aria-label", sp.label);
-          if (proxActive && nxt.key===sp.key && nxt.when) {
+          chip.setAttribute("font-family","system-ui,'Apple Symbols','Segoe UI Symbol','Noto Sans Symbols2',sans-serif");
+          if (prox && nxt.key===sp.key && nxt.when){
             text(tx, ty+14*scale, nxt.when.toISOString().slice(0,10), { size:10, fill:"#9aa0aa" });
           }
         });
       }
       drawSeasons();
 
-      // ---- Node ring: thin circle + ☊ ☋ pins just outside Earth orbit
-      circle(cx, cy, R_nodes, { fill:"none", stroke:"#242a33", width:1 });
-      let ascPin=null, descPin=null, micro=null;
-      function showMicro(x,y,str,ms=1800){
-        if (micro) { svg.removeChild(micro); micro=null; }
-        micro = text(x, y-14, str, { size:11, fill:"#cbd1db" });
-        setTimeout(()=>{ if (micro) { svg.removeChild(micro); micro=null; } }, ms);
+      // ---- Lunar nodes: pins only (no ring)
+      let ascPin = null, descPin = null, micro = null;
+
+      function showMicro(x, y, str, ms = 1800){
+        if (micro) { svg.removeChild(micro); micro = null; }
+        micro = text(x, y - 14, str, { size: 11, fill: "#cbd1db" });
+        setTimeout(() => { if (micro) { svg.removeChild(micro); micro = null; } }, ms);
       }
-      (function renderNodesOnce(retries=0){
+
+      (function renderNodesOnce(retries = 0){
         const E = window.Z0DI && window.Z0DI.ephemDaily;
-        if (!E || E.node_asc_lon_deg==null || E.node_desc_lon_deg==null) {
-          if (retries<20) setTimeout(()=>renderNodesOnce(retries+1), 250);
+        if (!E || E.node_asc_lon_deg == null || E.node_desc_lon_deg == null) {
+          if (retries < 20) setTimeout(() => renderNodesOnce(retries + 1), 250);
           return;
         }
+
         const nodes = [
-          { lon:E.node_asc_lon_deg,  glyph:"☊" },
-          { lon:E.node_desc_lon_deg, glyph:"☋" },
+          { lon: E.node_asc_lon_deg,  glyph: "☊" },
+          { lon: E.node_desc_lon_deg, glyph: "☋" },
         ];
-        nodes.forEach((n,i)=>{
+
+        nodes.forEach((n, i) => {
           const ang = toSceneAngle(n.lon);
-          const x = cx + R_nodes*Math.cos(ang);
-          const y = cy + R_nodes*Math.sin(ang);
-          text(x, y, n.glyph, { size:16 });
-          if (i===0) ascPin={x,y,lon:n.lon,glyph:n.glyph}; else descPin={x,y,lon:n.lon,glyph:n.glyph};
+          const x = cx + R_nodes * Math.cos(ang);
+          const y = cy + R_nodes * Math.sin(ang);
+          const el = text(x, y, txt(n.glyph), { size: 16, fill: "#e6e7eb" });
+          el.setAttribute("font-family", "system-ui,'Apple Symbols','Segoe UI Symbol','Noto Sans Symbols2',sans-serif");
+          if (i === 0) ascPin = { x, y, lon: n.lon, glyph: n.glyph };
+          else         descPin = { x, y, lon: n.lon, glyph: n.glyph };
         });
-        svg.addEventListener("click",(ev)=>{
-          const pt = svg.createSVGPoint(); pt.x=ev.offsetX; pt.y=ev.offsetY;
-          const cand=[ascPin,descPin].filter(Boolean).map(p=>({p,d2:(pt.x-p.x)**2+(pt.y-p.y)**2})).sort((a,b)=>a.d2-b.d2);
-          if (!cand.length || cand[0].d2>18*18) return;
-          const h=cand[0].p;
+
+        // one-time click handler for micro-labels
+        svg.addEventListener("click", (ev) => {
+          const pt = svg.createSVGPoint(); pt.x = ev.offsetX; pt.y = ev.offsetY;
+          const cand = [ascPin, descPin]
+            .filter(Boolean)
+            .map(p => ({ p, d2: (pt.x - p.x) ** 2 + (pt.y - p.y) ** 2 }))
+            .sort((a, b) => a.d2 - b.d2);
+          if (!cand.length || cand[0].d2 > 18 * 18) return;
+          const h = cand[0].p;
           showMicro(h.x, h.y, `${h.glyph} ${degInSignInt(h.lon)}°${signGlyphFromLon(h.lon)}`);
-        }, { once:true });
+        }, { once: true });
       })();
+
 
       // Sun marker, Earth orbit, Moon orbit and bodies
       circle(cx,cy,18,{fill:"#f5b301",stroke:"#0b0c10",width:2}); text(cx,cy-30,"Sun",{size:12,fill:"#9aa0aa"});
