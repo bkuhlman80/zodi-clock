@@ -32,36 +32,41 @@ days_to = (next_season[1] - now).total_seconds()/86400.0
 
 
 # --- Lunar nodes: nearest ascending across a wide window, with debug
-nodes_start = ts.from_datetime(now - timedelta(days=365))
-nodes_end   = ts.from_datetime(now + timedelta(days=730))
+# --- Lunar nodes: nearest ascending across a wide window
+nodes_start = ts.from_datetime(now - timedelta(days=365*3))
+nodes_end   = ts.from_datetime(now + timedelta(days=365*3))
 
+print("[eph] using de440s.bsp")
 tn, kind = almanac.find_discrete(nodes_start, nodes_end, almanac.moon_nodes(eph))
-print("[eph] trying de440s.bsp")
 print(f"[nodes] window: {nodes_start.utc_strftime()} → {nodes_end.utc_strftime()}")
-tn, kind = almanac.find_discrete(nodes_start, nodes_end, almanac.moon_nodes(eph))
 print(f"[nodes] events={len(tn)} kinds_sample={list(map(int, kind[:12]))}")
 
-asc_time = None
-best = float("inf")
+# pick nearest ascending (>0)
+asc_time, best = None, float("inf")
 for t, k in zip(tn, kind):
-    if int(k) > 0:  # ascending
+    if int(k) > 0:
         dt = abs((t.utc_datetime() - now).total_seconds())
         if dt < best:
             best = dt
             asc_time = t
 
-
+# fallback: latest ascending if none picked
 if asc_time is None:
-    # fallback: latest ascending in the set
     for t, k in reversed(list(zip(tn, kind))):
         if int(k) > 0:
             asc_time = t
+            best = abs((t.utc_datetime() - now).total_seconds())
             break
-        
+
+# compute longitude THEN assert and derive the opposite node
 if asc_time is not None:
-    print(f"[nodes] chose asc_time={asc_time.utc_strftime()} dt_s={best:.0f}")
+    ast = eph["earth"].at(asc_time).observe(eph["moon"]).apparent()
+    lon, lat, _ = ast.frame_latlon(ecliptic_frame)
+    asc_lon = float(lon.degrees % 360.0)
+    print(f"[nodes] asc_time={asc_time.utc_strftime()} dt_s={best:.0f} asc_lon={asc_lon:.3f}")
 else:
-    print("[nodes] no ascending node found; falling back")
+    asc_lon = 0.0
+    print("[nodes] no ascending node found; using 0.0")
 
 assert 0.0 <= asc_lon < 360.0, f"asc_lon out of range: {asc_lon}"
 desc_lon = (asc_lon + 180.0) % 360.0
