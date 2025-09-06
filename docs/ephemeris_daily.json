@@ -1,10 +1,1 @@
-{
-  "iso_date": "2025-09-05",
-  "next_season_event": "SepEq",
-  "next_season_utc": "2025-09-22T12:43:00Z",
-  "days_to_season": 17.4,
-  "node_asc_lon_deg": 48.0,
-  "node_desc_lon_deg": 228.0,
-  "node_asc_sign": "♉︎",
-  "node_desc_sign": "♏︎"
-}
+{"iso_date":"2025-09-06","next_season_event":"SepEq","next_season_utc":"2025-09-22T18:19:20.497683Z","days_to_season":16.693,"node_asc_lon_deg":0.0,"node_desc_lon_deg":360.0,"node_asc_sign":"\u2648\ufe0e","node_desc_sign":"\u2653\ufe0e"}
