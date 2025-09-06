@@ -32,7 +32,10 @@ nodes_start = ts.from_datetime(now - timedelta(days=365))
 nodes_end   = ts.from_datetime(now + timedelta(days=730))
 
 tn, kind = almanac.find_discrete(nodes_start, nodes_end, almanac.moon_nodes(eph))
-print(f"[nodes] events found: {len(tn)}; kinds sample:", list(map(int, kind[:10])))
+print("[eph] trying de440s.bsp")
+print(f"[nodes] window: {nodes_start.utc_strftime()} → {nodes_end.utc_strftime()}")
+tn, kind = almanac.find_discrete(nodes_start, nodes_end, almanac.moon_nodes(eph))
+print(f"[nodes] events={len(tn)} kinds_sample={list(map(int, kind[:12]))}")
 
 asc_time = None
 best = float("inf")
@@ -59,7 +62,7 @@ if asc_time is not None:
 else:
     asc_lon = 0.0
     print("[nodes] asc_time not found; using 0.0")
-    
+
 assert 0.0 <= asc_lon < 360.0, f"asc_lon out of range: {asc_lon}"
 desc_lon = (asc_lon + 180.0) % 360.0
 
