@@ -6,6 +6,7 @@ console.log('Z0DI clock js loaded v=20250906-3');
     "♈︎ Aries","♉︎ Taurus","♊︎ Gemini","♋︎ Cancer","♌︎ Leo","♍︎ Virgo",
     "♎︎ Libra","♏︎ Scorpio","♐︎ Sagittarius","♑︎ Capricorn","♒︎ Aquarius","♓︎ Pisces"
   ];
+  const EMO = "\uFE0F";     // emoji presentation
   const MS = 1000, DAY = 86400 * MS, YEAR_DAYS = 365.24219, MOON_SYNODIC_DAYS = 29.530588853;
   const NEW_MOON_REF = new Date(Date.UTC(2000, 0, 6, 18, 14, 0)); // real new moon epoch
   const VS = "\uFE0E"; // text presentation
@@ -16,54 +17,57 @@ console.log('Z0DI clock js loaded v=20250906-3');
   function toDegMin(x){ const d=Math.floor(x); const m=Math.floor((x-d)*60); return `${d}°${String(m).padStart(2,"0")}’`; }
   function signIndex(lon){ return Math.floor(mod(lon,360)/30); }
 
-  // ---- ephemeris_daily loader (no module imports) ----
+  // ---- ephemeris_daily loader (data only) ----
   let EPHEM = null;
   function clamp360(x){ return ((x % 360) + 360) % 360; }
   function signGlyphFromDeg(deg){
     const g=["♈︎","♉︎","♊︎","♋︎","♌︎","♍︎","♎︎","♏︎","♐︎","♑︎","♒︎","♓︎"];
     return g[Math.floor(clamp360(deg)/30)];
   }
-  async function loadEphemerisDaily(){
-  try{
-    const url = './ephemeris_daily.json?v=' + Date.now();   // this URL works in your browser
-    console.log('fetching ephemeris:', url);
-    const res = await fetch(url, { cache:'no-store' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const raw = await res.json();
 
-    let asc  = typeof raw.node_asc_lon_deg==='number'  ? clamp360(raw.node_asc_lon_deg)  : null;
-    let desc = typeof raw.node_desc_lon_deg==='number' ? clamp360(raw.node_desc_lon_deg) : null;
-    if (asc==null && desc!=null) asc  = clamp360(desc+180);
-    if (desc==null && asc!=null) desc = clamp360(asc+180);
+  async function loadEphemerisDaily(){
+    try{
+      const url = './ephemeris_daily.json?v=' + Date.now();
+      console.log('fetching ephemeris:', url);
+      const res = await fetch(url, { cache:'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const raw = await res.json();
+
+      // normalize node longitudes
+      let asc  = (typeof raw.node_asc_lon_deg  === 'number') ? clamp360(raw.node_asc_lon_deg)  : null;
+      let desc = (typeof raw.node_desc_lon_deg === 'number') ? clamp360(raw.node_desc_lon_deg) : null;
+      if (asc==null && desc!=null) asc  = clamp360(desc + 180);
+      if (desc==null && asc!=null) desc = clamp360(asc  + 180);
       if (asc!=null && desc!=null) {
-        const diff = Math.abs(((desc - asc + 540) % 360) - 180);
-        if (diff > 1) desc = clamp360(asc + 180);   // fix 0/360 or wrong pairs
+        const delta = Math.abs(((desc - asc + 540) % 360) - 180);
+        if (delta > 1) desc = clamp360(asc + 180);
       }
 
-    EPHEM = {
-      iso_date: String(raw.iso_date || new Date().toISOString().slice(0,10)),
-      next_season_event: raw.next_season_event ?? null,
-      next_season_utc: raw.next_season_utc ?? null,
-      days_to_season: typeof raw.days_to_season==='number' ? raw.days_to_season : null,
-      node_asc_lon_deg: asc,
-      node_desc_lon_deg: desc,
-      node_asc_sign: raw.node_asc_sign || (asc!=null ? signGlyphFromDeg(asc) : null),
-      node_desc_sign: raw.node_desc_sign || (desc!=null ? signGlyphFromDeg(desc) : null),
-    };
-    window.Z0DI = Object.assign(window.Z0DI||{}, { ephemDaily: EPHEM });
-    console.log('Ephemeris loaded:', EPHEM);
-  } catch(e){
-    console.warn('ephemeris load failed:', e);
+      EPHEM = {
+        iso_date: String(raw.iso_date || new Date().toISOString().slice(0,10)),
+        next_season_event: raw.next_season_event ?? null,
+        next_season_utc:   raw.next_season_utc   ?? null,
+        days_to_season:    (typeof raw.days_to_season === 'number') ? raw.days_to_season : null,
+        node_asc_lon_deg:  asc,
+        node_desc_lon_deg: desc,
+        node_asc_sign:     raw.node_asc_sign  || (asc  != null ? signGlyphFromDeg(asc)  : null),
+        node_desc_sign:    raw.node_desc_sign || (desc != null ? signGlyphFromDeg(desc) : null),
+      };
+
+      window.Z0DI = Object.assign(window.Z0DI||{}, { ephemDaily: EPHEM });
+      console.log('Ephemeris loaded:', EPHEM);
+    } catch(e){
+      console.warn('ephemeris load failed:', e);
+    }
   }
-}
-loadEphemerisDaily();
+  loadEphemerisDaily();
 
   // ---- seasons helpers (Astronomy Engine) ----
   const SEASON_META = [
-    { key:"MarEq", lon:0,   glyph: txt("☉")+txt("♈"), label:"March Equinox" },
-    { key:"JunSol",lon:90,  glyph: txt("☉")+txt("♋"), label:"June Solstice" },
-    { key:"SepEq", lon:180, glyph: txt("☉")+txt("♎"), label:"September Equinox" },
-    { key:"DecSol",lon:270, glyph: txt("☉")+txt("♑"), label:"December Solstice" },
+    { key:"MarEq", lon:  0, glyph: "♈"+EMO, label:"March Equinox" },
+    { key:"JunSol",lon: 90, glyph: "♋"+EMO, label:"June Solstice" },
+    { key:"SepEq", lon:180, glyph: "♎"+EMO, label:"September Equinox" },
+    { key:"DecSol",lon:270, glyph: "♑"+EMO, label:"December Solstice" },
   ];
 
 

@@ -25,22 +25,33 @@ pairs = [(labels[int(w)], t.utc_datetime()) for t, w in zip(t_sea, which)]
 next_season = next((lab, dt) for lab, dt in pairs if dt > now)
 days_to = (next_season[1] - now).total_seconds()/86400.0
 
-# Lunar nodes around now ±60d
-tA0 = ts.from_datetime(now - timedelta(days=60))
-tA1 = ts.from_datetime(now + timedelta(days=60))
-t_nodes, asc_desc = almanac.find_discrete(tA0, tA1, almanac.moon_nodes(eph))
-earth, moon = eph['earth'], eph['moon']
-asc_lon = desc_lon = None
-for t, k in zip(t_nodes, asc_desc):
-    if t.utc_datetime() <= now:
-        ast = earth.at(t).observe(moon).apparent()
-        lon, lat, _ = ast.frame_latlon(ecliptic_frame)
-        if k == 1: asc_lon = float(lon.degrees % 360.0)
-        else:      desc_lon = float(lon.degrees % 360.0)
+# --- Lunar nodes (get one high-precision asc node, make desc = +180°)
+from datetime import timedelta
+t0 = ts.from_datetime(now - timedelta(days=40))
+t1 = ts.from_datetime(now + timedelta(days=40))
+tn, kind = almanac.find_discrete(t0, t1, almanac.moon_nodes(eph))
 
-# Fill opposite if one missing
-if asc_lon is None and desc_lon is not None: asc_lon  = (desc_lon + 180.0) % 360.0
-if desc_lon is None and asc_lon is not None: desc_lon = (asc_lon  + 180.0) % 360.0
+# pick the ascending node **nearest to now**
+asc_time = None
+best = 1e99
+for t, k in zip(tn, kind):
+    if k == 1:  # ascending
+        dt = abs((t.utc_datetime() - now).total_seconds())
+        if dt < best:
+            best = dt
+            asc_time = t
+
+asc_lon = None
+if asc_time is not None:
+    ast = eph['earth'].at(asc_time).observe(eph['moon']).apparent()
+    lon, lat, _ = ast.frame_latlon(ecliptic_frame)  # lat ~ 0 here
+    asc_lon = float(lon.degrees % 360.0)
+
+if asc_lon is None:
+    # very unlikely, but keep JSON valid
+    asc_lon = 0.0
+
+desc_lon = (asc_lon + 180.0) % 360.0
 
 out = {
   "iso_date": now.date().isoformat(),
