@@ -25,6 +25,8 @@ pairs = [(labels[int(w)], t.utc_datetime()) for t, w in zip(t_sea, which)]
 next_season = next((lab, dt) for lab, dt in pairs if dt > now)
 days_to = (next_season[1] - now).total_seconds()/86400.0
 
+
+
 # --- Lunar nodes: nearest ascending across a wide window, with debug
 nodes_start = ts.from_datetime(now - timedelta(days=365))
 nodes_end   = ts.from_datetime(now + timedelta(days=730))
@@ -59,6 +61,8 @@ else:
     print("[nodes] asc_time not found; using 0.0")
 
 desc_lon = (asc_lon + 180.0) % 360.0
+
+
 
 
 
