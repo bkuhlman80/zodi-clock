@@ -16,56 +16,8 @@ console.log('Z0DI clock js loaded v=20250906-3');
   function toDegMin(x){ const d=Math.floor(x); const m=Math.floor((x-d)*60); return `${d}°${String(m).padStart(2,"0")}’`; }
   function signIndex(lon){ return Math.floor(mod(lon,360)/30); }
 
-  // --- badge helpers ---
-  function badge(x, y, opts){
-    // opts: {label, fg, bg, pad=4, r=8, size=11, dy=0}
-    const g = document.createElementNS(ns, "g");
-    const t = document.createElementNS(ns, "text");
-    t.setAttribute("x", x);
-    t.setAttribute("y", y + (opts.dy||0));
-    t.setAttribute("fill", opts.fg || "#e6e7eb");
-    t.setAttribute("font-size", String(opts.size||11));
-    t.setAttribute("text-anchor", "middle");
-    t.setAttribute("dominant-baseline", "middle");
-    t.textContent = opts.label;
-
-    // measure (roughly) via text length -> convert to px width
-    // fallback: 7px per char at size=11
-    const charw = (opts.size||11) * 0.64;
-    const w = charw * (opts.label||"").length + 2*(opts.pad||4);
-    const h = (opts.size||11) + (opts.pad||4);
-    const rx = opts.r || 8;
-
-    const rect = document.createElementNS(ns, "rect");
-    rect.setAttribute("x", x - w/2);
-    rect.setAttribute("y", y - h/2);
-    rect.setAttribute("width", w);
-    rect.setAttribute("height", h);
-    rect.setAttribute("rx", rx);
-    rect.setAttribute("fill", opts.bg || "#2a2f39");
-    rect.setAttribute("stroke", "none");
-
-    g.appendChild(rect);
-    g.appendChild(t);
-    svg.appendChild(g);
-    return g;
-  }
-
   const FONT_SYM = "system-ui,'Apple Symbols','Segoe UI Symbol','Noto Sans Symbols 2','Noto Sans Symbols','Symbola',sans-serif";
-  function glyph(x, y, ch, size=16, color="#e6e7eb"){
-    const t = document.createElementNS(ns, "text");
-    t.setAttribute("x", x);
-    t.setAttribute("y", y);
-    t.setAttribute("fill", color);
-    t.setAttribute("font-size", String(size));
-    t.setAttribute("font-family", FONT_SYM);
-    t.setAttribute("text-anchor", "middle");
-    t.setAttribute("dominant-baseline", "middle");
-    t.textContent = ch;     // this is an SVG “image” you control (color/size)
-    svg.appendChild(t);
-    return t;
-  }
-
+  
   // ---- ephemeris_daily loader (data only) ----
   let EPHEM = null;
   function clamp360(x){ return ((x % 360) + 360) % 360; }
@@ -301,6 +253,8 @@ console.log('Z0DI clock js loaded v=20250906-3');
     }
 
     afterRender() {
+      console.log("afterRender live v=Z0DI-0906-B"); // live check
+
       const ns = "http://www.w3.org/2000/svg";
       const svg = this.shadowRoot.getElementById("scene");
       const btnAnimated = this.shadowRoot.getElementById("btnAnimated");
@@ -317,6 +271,62 @@ console.log('Z0DI clock js loaded v=20250906-3');
       const W=800,H=800,cx=W/2,cy=H/2, R_zodiac=350, R_earth=170, R_moon=50;         
       const R_season = R_earth;                      
       const R_nodes = R_earth + R_moon;
+
+      function badge(x, y, opts){
+        // opts: {label, fg, bg, pad=4, r=8, size=11, dy=0}
+        const g = document.createElementNS(ns, "g");
+        const t = document.createElementNS(ns, "text");
+        t.setAttribute("x", x);
+        t.setAttribute("y", y + (opts.dy||0));
+        t.setAttribute("fill", opts.fg || "#e6e7eb");
+        t.setAttribute("font-size", String(opts.size||11));
+        t.setAttribute("text-anchor", "middle");
+        t.setAttribute("dominant-baseline", "middle");
+        t.textContent = opts.label;
+
+        // measure (roughly) via text length -> convert to px width
+        // fallback: 7px per char at size=11
+        const charw = (opts.size||11) * 0.64;
+        const w = charw * (opts.label||"").length + 2*(opts.pad||4);
+        const h = (opts.size||11) + (opts.pad||4);
+        const rx = opts.r || 8;
+
+        const rect = document.createElementNS(ns, "rect");
+        rect.setAttribute("x", x - w/2);
+        rect.setAttribute("y", y - h/2);
+        rect.setAttribute("width", w);
+        rect.setAttribute("height", h);
+        rect.setAttribute("rx", rx);
+        rect.setAttribute("fill", opts.bg || "#2a2f39");
+        rect.setAttribute("stroke", "none");
+
+        g.appendChild(rect);
+        g.appendChild(t);
+        svg.appendChild(g);
+        return g;
+      }
+
+      function glyph(x, y, ch, size=16, color="#e6e7eb"){
+          const t = document.createElementNS(ns, "text");
+          t.setAttribute("x", x);
+          t.setAttribute("y", y);
+          t.setAttribute("fill", color);
+          t.setAttribute("font-size", String(size));
+          t.setAttribute("font-family", FONT_SYM);
+          t.setAttribute("text-anchor", "middle");
+          t.setAttribute("dominant-baseline", "middle");
+          t.textContent = ch;     // this is an SVG “image” you control (color/size)
+          svg.appendChild(t);
+          return t;
+        }
+      
+      let ascPin = null, descPin = null, micro = null;
+      function showMicro(x,y,str,ms=1800){
+        if (micro) { svg.removeChild(micro); micro=null; }
+        const t = text(x, y-14, str, { size:11, fill:"#cbd1db" });
+        micro = t;
+        setTimeout(()=>{ if (micro) { svg.removeChild(micro); micro=null; } }, ms);
+      }
 
       (function renderNodesOnce(tries=0){
         const E = window.Z0DI && window.Z0DI.ephemDaily;
@@ -405,13 +415,6 @@ console.log('Z0DI clock js loaded v=20250906-3');
       drawSeasons();
 
       // ---- Lunar nodes -- 
-      let ascPin=null, descPin=null, micro=null;
-
-      function showMicro(x,y,str,ms=1800){
-        if (micro) { svg.removeChild(micro); micro=null; }
-        micro = text(x, y-14, str, { size:11, fill:"#cbd1db" });
-        setTimeout(()=>{ if (micro) { svg.removeChild(micro); micro=null; } }, ms);
-      }
 
       (function renderNodesOnce(tries=0){
         const E = window.Z0DI && window.Z0DI.ephemDaily;
@@ -532,8 +535,6 @@ console.log('Z0DI clock js loaded v=20250906-3');
       };
 
       updateScene(new Date());
-      this._raf = requestAnimationFrame(loop);
-            updateScene(new Date());
       this._raf = requestAnimationFrame(loop);
     } // end of afterRender
   }   // end of class ZodiClock

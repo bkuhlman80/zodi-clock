@@ -32,13 +32,13 @@ nodes_start = ts.from_datetime(now - timedelta(days=365))
 nodes_end   = ts.from_datetime(now + timedelta(days=730))
 
 tn, kind = almanac.find_discrete(nodes_start, nodes_end, almanac.moon_nodes(eph))
-print(f"[nodes] events found: {len(tn)}")
+print(f"[nodes] events found: {len(tn)}; kinds sample:", list(map(int, kind[:10])))
 
 asc_time = None
 best = float("inf")
 for t, k in zip(tn, kind):
     # Skyfield uses 1 for ascending, 0 for descending
-    if int(k) == 1:
+    if int(k) > 0:
         dt = abs((t.utc_datetime() - now).total_seconds())
         if dt < best:
             best = dt
@@ -47,7 +47,7 @@ for t, k in zip(tn, kind):
 if asc_time is None:
     # fallback: latest ascending in the set
     for t, k in reversed(list(zip(tn, kind))):
-        if int(k) == 1:
+        if int(k) > 0:
             asc_time = t
             break
 
@@ -59,8 +59,10 @@ if asc_time is not None:
 else:
     asc_lon = 0.0
     print("[nodes] asc_time not found; using 0.0")
-
+    
+assert 0.0 <= asc_lon < 360.0, f"asc_lon out of range: {asc_lon}"
 desc_lon = (asc_lon + 180.0) % 360.0
+
 
 
 
