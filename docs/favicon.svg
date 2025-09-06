@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-132 -132 264 264">
+  <defs>
+    <style>
+      .r{fill:none;stroke:#2b2f3a;stroke-width:6}
+      .t{fill:#cfd3dc;font:12px/1 sans-serif}
+    </style>
+  </defs>
+  <circle cx="0" cy="0" r="120" class="r"/>
+  <!-- solstices/equinoxes ticks -->
+  <g stroke="#adb5bd" stroke-width="6">
+    <line x1="0" y1="-120" x2="0" y2="-108"/>
+    <line x1="120" y1="0" x2="108" y2="0"/>
+    <line x1="0" y1="120" x2="0" y2="108"/>
+    <line x1="-120" y1="0" x2="-108" y2="0"/>
+  </g>
+  <!-- 12 sign dots -->
+  <g fill="#ffd166">
+    <!-- place 12 small dots -->
+    <!-- generated positions at 30° steps -->
+    <!-- top is 90°, rotate accordingly -->
+    <circle r="3" cx="0" cy="-96"/>
+    <circle r="3" cx="48" cy="-83.14"/>
+    <circle r="3" cx="83.14" cy="-48"/>
+    <circle r="3" cx="96" cy="0"/>
+    <circle r="3" cx="83.14" cy="48"/>
+    <circle r="3" cx="48" cy="83.14"/>
+    <circle r="3" cx="0" cy="96"/>
+    <circle r="3" cx="-48" cy="83.14"/>
+    <circle r="3" cx="-83.14" cy="48"/>
+    <circle r="3" cx="-96" cy="0"/>
+    <circle r="3" cx="-83.14" cy="-48"/>
+    <circle r="3" cx="-48" cy="-83.14"/>
+  </g>
+</svg>
