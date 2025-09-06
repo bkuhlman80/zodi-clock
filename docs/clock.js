@@ -3,14 +3,14 @@ console.log('Z0DI clock js loaded v=20250906-3');
 (function () {
   // ---------- constants & helpers ----------
   const SIGNS = [
-    "Aries","Taurus","Gemini","Cancer","Leo","Virgo",
-    "Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"
+    "♈︎ Aries","♉︎ Taurus","♊︎ Gemini","♋︎ Cancer","♌︎ Leo","♍︎ Virgo",
+    "♎︎ Libra","♏︎ Scorpio","♐︎ Sagittarius","♑︎ Capricorn","♒︎ Aquarius","♓︎ Pisces"
   ];
   const MS = 1000, DAY = 86400 * MS, YEAR_DAYS = 365.24219, MOON_SYNODIC_DAYS = 29.530588853;
   const NEW_MOON_REF = new Date(Date.UTC(2000, 0, 6, 18, 14, 0)); // real new moon epoch
-  const VS_TEXT = "\uFE0E"; // text presentation selector
-
-  function txt(g){ return g + VS_TEXT; }
+  const VS = "\uFE0E"; // text presentation
+  const FONT_SYM = "system-ui,'Apple Symbols','Segoe UI Symbol','Noto Sans Symbols 2','Noto Sans Symbols','Symbola',sans-serif";
+  function txt(ch){ return ch + VS; }
   function marchEquinoxApprox(y){ return new Date(Date.UTC(y,2,20,21,0,0)); }
   function mod(n,m){ return ((n % m) + m) % m; }
   function toDegMin(x){ const d=Math.floor(x); const m=Math.floor((x-d)*60); return `${d}°${String(m).padStart(2,"0")}’`; }
@@ -317,49 +317,55 @@ loadEphemerisDaily();
       drawSeasons();
 
       // ---- Lunar nodes: pins only (no ring)
-      let ascPin = null, descPin = null, micro = null;
+      let ascPin=null, descPin=null, micro=null;
 
-      function showMicro(x, y, str, ms = 1800){
-        if (micro) { svg.removeChild(micro); micro = null; }
-        micro = text(x, y - 14, str, { size: 11, fill: "#cbd1db" });
-        setTimeout(() => { if (micro) { svg.removeChild(micro); micro = null; } }, ms);
+      function showMicro(x,y,str,ms=1800){
+        if (micro) { svg.removeChild(micro); micro=null; }
+        micro = text(x, y-14, str, { size:11, fill:"#cbd1db" });
+        setTimeout(()=>{ if (micro) { svg.removeChild(micro); micro=null; } }, ms);
       }
 
-      (function renderNodesOnce(retries = 0){
+      (function renderNodesOnce(tries=0){
         const E = window.Z0DI && window.Z0DI.ephemDaily;
-        if (!E || E.node_asc_lon_deg == null || E.node_desc_lon_deg == null) {
-          if (retries < 20) setTimeout(() => renderNodesOnce(retries + 1), 250);
+        if (!E || E.node_asc_lon_deg==null || E.node_desc_lon_deg==null) {
+          if (tries < 20) return setTimeout(()=>renderNodesOnce(tries+1), 250);
+          console.warn("nodes: ephemeris missing");
           return;
         }
+        // debug to ensure both are present
+        console.log("nodes deg:", E.node_asc_lon_deg, E.node_desc_lon_deg);
 
         const nodes = [
           { lon: E.node_asc_lon_deg,  glyph: "☊" },
           { lon: E.node_desc_lon_deg, glyph: "☋" },
         ];
 
-        nodes.forEach((n, i) => {
+        nodes.forEach((n,i)=>{
           const ang = toSceneAngle(n.lon);
-          const x = cx + R_nodes * Math.cos(ang);
-          const y = cy + R_nodes * Math.sin(ang);
-          const el = text(x, y, txt(n.glyph), { size: 16, fill: "#e6e7eb" });
-          el.setAttribute("font-family", "system-ui,'Apple Symbols','Segoe UI Symbol','Noto Sans Symbols2',sans-serif");
-          if (i === 0) ascPin = { x, y, lon: n.lon, glyph: n.glyph };
-          else         descPin = { x, y, lon: n.lon, glyph: n.glyph };
+          const x = cx + R_nodes*Math.cos(ang);
+          const y = cy + R_nodes*Math.sin(ang);
+
+          // tiny dark halo for readability (optional)
+          circle(x,y,9,{fill:"#0f1218"});
+
+          const el = text(x, y, txt(n.glyph), { size:16, fill:"#e6e7eb" });
+          el.setAttribute("font-family", FONT_SYM);
+          el.setAttribute("font-weight", "400");
+
+          if (i===0) ascPin={x,y,lon:n.lon,glyph:n.glyph}; else descPin={x,y,lon:n.lon,glyph:n.glyph};
         });
 
-        // one-time click handler for micro-labels
-        svg.addEventListener("click", (ev) => {
-          const pt = svg.createSVGPoint(); pt.x = ev.offsetX; pt.y = ev.offsetY;
-          const cand = [ascPin, descPin]
+        svg.addEventListener("click",(ev)=>{
+          const pt = svg.createSVGPoint(); pt.x=ev.offsetX; pt.y=ev.offsetY;
+          const cand=[ascPin,descPin]
             .filter(Boolean)
-            .map(p => ({ p, d2: (pt.x - p.x) ** 2 + (pt.y - p.y) ** 2 }))
-            .sort((a, b) => a.d2 - b.d2);
-          if (!cand.length || cand[0].d2 > 18 * 18) return;
-          const h = cand[0].p;
+            .map(p=>({p,d2:(pt.x-p.x)**2+(pt.y-p.y)**2}))
+            .sort((a,b)=>a.d2-b.d2);
+          if (!cand.length || cand[0].d2>18*18) return;
+          const h=cand[0].p;
           showMicro(h.x, h.y, `${h.glyph} ${degInSignInt(h.lon)}°${signGlyphFromLon(h.lon)}`);
-        }, { once: true });
+        }, { once:true });
       })();
-
 
       // Sun marker, Earth orbit, Moon orbit and bodies
       circle(cx,cy,18,{fill:"#f5b301",stroke:"#0b0c10",width:2}); text(cx,cy-30,"Sun",{size:12,fill:"#9aa0aa"});
