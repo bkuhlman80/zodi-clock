@@ -1,3 +1,5 @@
+console.log('Z0DI clock js loaded v=20250905-3');
+
 (function () {
   // ---------- constants & helpers ----------
   const SIGNS = [
