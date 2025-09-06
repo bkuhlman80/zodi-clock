@@ -376,7 +376,6 @@ console.log('Z0DI clock js loaded v=20250906-3');
         const yr  = seasonsUTC(new Date().getUTCFullYear());
         const nxt = nextSeason(new Date().toISOString(), yr);
         const proxActive = Number.isFinite(nxt.days) && Math.abs(nxt.days) <= 3;
-
         const MONTH = { MarEq:"Mar", JunSol:"Jun", SepEq:"Sep", DecSol:"Dec" };
         SEASON_META.forEach(sp => {
           const ang = (-sp.lon - 90) * Math.PI/180;
