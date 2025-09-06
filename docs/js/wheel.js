@@ -28,8 +28,14 @@ export function drawWheel(ctx) {
     tg.setAttribute("font-family", FONT_SYM);
 
     // name
-    const [nx, ny] = polar(0, 0, RADIUS.zodiac - 46, a);
-    g.appendChild(text(nx, ny, SIGN_NAMES[i], { "font-size": 9, fill: COLORS.text, opacity: 0.7 }));
+    const [nx, ny] = polar(0, 0, RADIUS.zodiac - 36, a);
+    g.appendChild(text(nx, ny, SIGN_NAMES[i], {
+      "font-size": 12,           // try 12–14
+      "font-weight": 500,
+      "letter-spacing": 0.5,
+      fill: COLORS.text,
+      opacity: 0.85
+    }));
   }
 
   // Earth and Moon scaffolding rings

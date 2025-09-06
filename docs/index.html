@@ -37,6 +37,22 @@
   </script>
   <script type="module" src="./js/main.js?v=20250906-1"></script>
 
+  <!-- Controls above Z0DI Clock -->
+  <div id="controls" class="controls">
+    <button id="btn-anim">Animated</button>
+    <button id="btn-frozen">Frozen</button>
+    <input id="dt-input" type="datetime-local" step="1">
+  </div>
+  <zodi-clock></zodi-clock>
+  <style>
+  .controls{display:flex;gap:.5rem;align-items:center;margin:12px 0}
+  .controls button{font:600 14px system-ui;padding:10px 14px;border-radius:10px;border:1px solid #444}
+  .controls input{font:500 14px system-ui;padding:8px 10px;border-radius:10px;border:1px solid #444;min-width:280px}
+  @media (min-width:768px){
+    .controls button{font-size:16px;padding:12px 16px}
+    .controls input{font-size:16px;padding:10px 12px;min-width:360px}
+  }
+  </style>
 
   <!-- Minimal styles for the host page (component styles live in clock.js) -->
   <style>
