@@ -7,8 +7,23 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 
   <!-- Scripts -->
-  <script defer src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.21/astronomy.browser.min.js"></script>
-  <script defer src="./clock.js?v=20250905-3"></script>
+  <script>
+  (function loadAstronomy(i=0){
+    const srcs = [
+      "https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js",
+      "https://unpkg.com/astronomy-engine@2/astronomy.browser.min.js",
+      "https://esm.run/astronomy-engine@2/astronomy.browser.min.js"
+    ];
+    if (i >= srcs.length) { console.error("Astronomy failed to load"); return; }
+    const s = document.createElement("script");
+    s.defer = true;
+    s.src = srcs[i] + "?v=20250906";
+    s.onload = () => console.log("Astronomy loaded from", s.src, !!window.Astronomy);
+    s.onerror = () => { console.warn("fail", s.src); loadAstronomy(i+1); };
+    document.head.appendChild(s);
+    })();
+  </script>
+  <script defer src="./clock.js?v=20250906-1"></script>
 
 
   <!-- Slim host styling -->

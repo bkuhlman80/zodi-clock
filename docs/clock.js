@@ -272,7 +272,7 @@ loadEphemerisDaily();
 
       let seasonsYear = null;
       function drawSeasons() {
-        if (!window.Astronomy) { setTimeout(drawSeasons, 200); return; }
+        if (!window.Astronomy || !Astronomy.Seasons) { setTimeout(drawSeasons, 300); return; }
         seasonsYear = seasonsUTC(new Date().getUTCFullYear());
 
         let prox = { active:false, key:null, dateTag:null };
