@@ -10,12 +10,61 @@ console.log('Z0DI clock js loaded v=20250906-3');
   const MS = 1000, DAY = 86400 * MS, YEAR_DAYS = 365.24219, MOON_SYNODIC_DAYS = 29.530588853;
   const NEW_MOON_REF = new Date(Date.UTC(2000, 0, 6, 18, 14, 0)); // real new moon epoch
   const VS = "\uFE0E"; // text presentation
-  const FONT_SYM = "system-ui,'Apple Symbols','Segoe UI Symbol','Noto Sans Symbols 2','Noto Sans Symbols','Symbola',sans-serif";
   function txt(ch){ return ch + VS; }
   function marchEquinoxApprox(y){ return new Date(Date.UTC(y,2,20,21,0,0)); }
   function mod(n,m){ return ((n % m) + m) % m; }
   function toDegMin(x){ const d=Math.floor(x); const m=Math.floor((x-d)*60); return `${d}°${String(m).padStart(2,"0")}’`; }
   function signIndex(lon){ return Math.floor(mod(lon,360)/30); }
+
+  // --- badge helpers ---
+  function badge(x, y, opts){
+    // opts: {label, fg, bg, pad=4, r=8, size=11, dy=0}
+    const g = document.createElementNS(ns, "g");
+    const t = document.createElementNS(ns, "text");
+    t.setAttribute("x", x);
+    t.setAttribute("y", y + (opts.dy||0));
+    t.setAttribute("fill", opts.fg || "#e6e7eb");
+    t.setAttribute("font-size", String(opts.size||11));
+    t.setAttribute("text-anchor", "middle");
+    t.setAttribute("dominant-baseline", "middle");
+    t.textContent = opts.label;
+
+    // measure (roughly) via text length -> convert to px width
+    // fallback: 7px per char at size=11
+    const charw = (opts.size||11) * 0.64;
+    const w = charw * (opts.label||"").length + 2*(opts.pad||4);
+    const h = (opts.size||11) + (opts.pad||4);
+    const rx = opts.r || 8;
+
+    const rect = document.createElementNS(ns, "rect");
+    rect.setAttribute("x", x - w/2);
+    rect.setAttribute("y", y - h/2);
+    rect.setAttribute("width", w);
+    rect.setAttribute("height", h);
+    rect.setAttribute("rx", rx);
+    rect.setAttribute("fill", opts.bg || "#2a2f39");
+    rect.setAttribute("stroke", "none");
+
+    g.appendChild(rect);
+    g.appendChild(t);
+    svg.appendChild(g);
+    return g;
+  }
+
+  const FONT_SYM = "system-ui,'Apple Symbols','Segoe UI Symbol','Noto Sans Symbols 2','Noto Sans Symbols','Symbola',sans-serif";
+  function glyph(x, y, ch, size=16, color="#e6e7eb"){
+    const t = document.createElementNS(ns, "text");
+    t.setAttribute("x", x);
+    t.setAttribute("y", y);
+    t.setAttribute("fill", color);
+    t.setAttribute("font-size", String(size));
+    t.setAttribute("font-family", FONT_SYM);
+    t.setAttribute("text-anchor", "middle");
+    t.setAttribute("dominant-baseline", "middle");
+    t.textContent = ch;     // this is an SVG “image” you control (color/size)
+    svg.appendChild(t);
+    return t;
+  }
 
   // ---- ephemeris_daily loader (data only) ----
   let EPHEM = null;
@@ -264,9 +313,38 @@ console.log('Z0DI clock js loaded v=20250906-3');
       const phaseLabel= this.shadowRoot.getElementById("phaseLabel");
       const nowLabel  = this.shadowRoot.getElementById("nowLabel");
 
-      const W=800,H=800,cx=W/2,cy=H/2, R_zodiac=350, R_earth=170, R_moon=50;
-      const R_nodes  = R_earth + R_moon;             
+      const W=800,H=800,cx=W/2,cy=H/2, R_zodiac=350, R_earth=170, R_moon=50;         
       const R_season = R_earth;                      
+      const R_nodes = R_earth + R_moon;
+
+      (function renderNodesOnce(tries=0){
+        const E = window.Z0DI && window.Z0DI.ephemDaily;
+        if (!E || E.node_asc_lon_deg==null || E.node_desc_lon_deg==null) {
+          if (tries<20) return setTimeout(()=>renderNodesOnce(tries+1), 250);
+          return;
+        }
+
+        const nodes = [
+          { lon:E.node_asc_lon_deg,  label:"☊", color:"#e6e7eb" },
+          { lon:E.node_desc_lon_deg, label:"☋", color:"#e6e7eb" },
+        ];
+
+        nodes.forEach((n,i)=>{
+          const ang = toSceneAngle(n.lon);
+          const x = cx + R_nodes*Math.cos(ang);
+          const y = cy + R_nodes*Math.sin(ang);
+          glyph(x, y, n.label, 16, n.color);  // fully color-controlled SVG text
+          if (i===0) ascPin={x,y,lon:n.lon,glyph:n.label}; else descPin={x,y,lon:n.lon,glyph:n.label};
+        });
+
+        svg.addEventListener("click",(ev)=>{
+          const pt = svg.createSVGPoint(); pt.x=ev.offsetX; pt.y=ev.offsetY;
+          const cand=[ascPin,descPin].filter(Boolean).map(p=>({p,d2:(pt.x-p.x)**2+(pt.y-p.y)**2})).sort((a,b)=>a.d2-b.d2);
+          if (!cand.length || cand[0].d2>18*18) return;
+          const h=cand[0].p;
+          showMicro(h.x, h.y, `${h.glyph} ${degInSignInt(h.lon)}°${signGlyphFromLon(h.lon)}`);
+        }, { once:true });
+      })();
 
       // svg helpers
       const ns = "http://www.w3.org/2000/svg";
@@ -298,29 +376,36 @@ console.log('Z0DI clock js loaded v=20250906-3');
         const yr  = seasonsUTC(new Date().getUTCFullYear());
         const nxt = nextSeason(new Date().toISOString(), yr);
         const prox = Number.isFinite(nxt.days) && Math.abs(nxt.days)<=3;
-
-        SEASON_META.forEach(sp=>{
+        
+        const MONTH = { MarEq:"Mar", JunSol:"Jun", SepEq:"Sep", DecSol:"Dec" };
+        SEASON_META.forEach(sp => {
           const ang = (-sp.lon - 90) * Math.PI/180;
-          // tick mark on Earth orbit
+
+          // short tick on the Earth orbit (R_season = R_earth)
           const x1=cx+R_season*Math.cos(ang), y1=cy+R_season*Math.sin(ang);
           const x2=cx+(R_season-14)*Math.cos(ang), y2=cy+(R_season-14)*Math.sin(ang);
           line(x1,y1,x2,y2,{stroke:"#2a2f39",width:1.5});
 
-          // glyph on orbit
-          const tx=cx+(R_season-22)*Math.cos(ang);
-          const ty=cy+(R_season-22)*Math.sin(ang);
-          const scale = prox && nxt.key===sp.key ? 1.18 : 1.0;
-          const chip = text(tx,ty,sp.glyph,{size:12,fill:"#cbd1db"});
-          chip.setAttribute("transform",`translate(${tx},${ty}) scale(${scale}) translate(${-tx},${-ty})`);
-          chip.setAttribute("font-family","system-ui,'Apple Symbols','Segoe UI Symbol','Noto Sans Symbols2',sans-serif");
-          if (prox && nxt.key===sp.key && nxt.when){
-            text(tx, ty+14*scale, nxt.when.toISOString().slice(0,10), { size:10, fill:"#9aa0aa" });
+          // badge just inside the orbit
+          const tx=cx+(R_season-24)*Math.cos(ang);
+          const ty=cy+(R_season-24)*Math.sin(ang);
+          const active = proxActive && nxt.key===sp.key;
+          badge(tx, ty, {
+            label: MONTH[sp.key],
+            fg: "#0b0c10",
+            bg: active ? "#f5b301" : "#cbd1db",
+            size: 11, pad: 5, r: 7
+          });
+
+          if (active && nxt.when){
+            // tiny date tag under the badge
+            badge(tx, ty+16, { label: nxt.when.toISOString().slice(0,10), fg:"#9aa0aa", bg:"transparent", size:10, pad:2, r:4 });
           }
         });
       }
       drawSeasons();
 
-      // ---- Lunar nodes: pins only (no ring)
+      // ---- Lunar nodes -- 
       let ascPin=null, descPin=null, micro=null;
 
       function showMicro(x,y,str,ms=1800){
