@@ -11,8 +11,12 @@ def sign_glyph(deg):
     return g[int((deg % 360)//30)]
 
 ts = load.timescale()
-# Use modern kernel; DE421 is fine too if size matters
-eph = load("de440s.bsp")  # cached by Skyfield in ~/.skyfield
+try:
+    eph = load("de440s.bsp")
+    print("[eph] using de440s")
+except Exception as e:
+    print("[eph] de440s failed:", e, "→ using de421")
+    eph = load("de421.bsp")
 
 now = datetime.now(timezone.utc)
 y = now.year
@@ -40,12 +44,12 @@ print(f"[nodes] events={len(tn)} kinds_sample={list(map(int, kind[:12]))}")
 asc_time = None
 best = float("inf")
 for t, k in zip(tn, kind):
-    # Skyfield uses 1 for ascending, 0 for descending
-    if int(k) > 0:
+    if int(k) > 0:  # ascending
         dt = abs((t.utc_datetime() - now).total_seconds())
         if dt < best:
             best = dt
             asc_time = t
+
 
 if asc_time is None:
     # fallback: latest ascending in the set
@@ -53,22 +57,14 @@ if asc_time is None:
         if int(k) > 0:
             asc_time = t
             break
-
+        
 if asc_time is not None:
-    ast = eph["earth"].at(asc_time).observe(eph["moon"]).apparent()
-    lon, lat, _ = ast.frame_latlon(ecliptic_frame)
-    asc_lon = float(lon.degrees % 360.0)
-    print(f"[nodes] asc_time={asc_time.utc_strftime()} asc_lon={asc_lon:.3f}")
+    print(f"[nodes] chose asc_time={asc_time.utc_strftime()} dt_s={best:.0f}")
 else:
-    asc_lon = 0.0
-    print("[nodes] asc_time not found; using 0.0")
+    print("[nodes] no ascending node found; falling back")
 
 assert 0.0 <= asc_lon < 360.0, f"asc_lon out of range: {asc_lon}"
 desc_lon = (asc_lon + 180.0) % 360.0
-
-
-
-
 
 
 out = {
