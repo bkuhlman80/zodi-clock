@@ -345,9 +345,6 @@ loadEphemerisDaily();
           const x = cx + R_nodes*Math.cos(ang);
           const y = cy + R_nodes*Math.sin(ang);
 
-          // tiny dark halo for readability (optional)
-          circle(x,y,9,{fill:"#0f1218"});
-
           const el = text(x, y, txt(n.glyph), { size:16, fill:"#e6e7eb" });
           el.setAttribute("font-family", FONT_SYM);
           el.setAttribute("font-weight", "400");
