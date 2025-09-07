@@ -82,9 +82,9 @@ export function initNodes(ctx){
     return `M ${x1} ${y1} A ${r} ${r} 0 ${large} ${sweep} ${x2} ${y2}`;
     }
 
-  // two short arcs of fixed arc length ≈63 at r=200, hugging the node symbol, sun-centered  
+  // two short arcs of fixed arc length ≈63 at r=200, hugging the node symbol, sun-centered    
   function drawNodeArcsPair(nodeLon, highlight){
-    const r = RADIUS.nodes;                     // 200
+    const r = RADIUS.nodes;                 // 200
     const arcLen = 63;
     const arcDeg = arcLen * 360 / (2 * Math.PI * r);   // ≈18°
     const style = {
@@ -95,12 +95,12 @@ export function initNodes(ctx){
       "stroke-linecap": "round",
       "stroke-opacity": highlight ? 0.65 : 0.35
     };
-    // left of node
-    const sLeft = toSceneDeg(nodeLon - arcDeg);
-    arcsG.appendChild(path(smallArcPath(0,0,r, sLeft, arcDeg), style));
-    // right of node
-    const sRight = toSceneDeg(nodeLon);
-    arcsG.appendChild(path(smallArcPath(0,0,r, sRight, arcDeg), style));
+    // Compute around the pin in SCENE space so arcs straddle it
+    const A = toSceneDeg(nodeLon);
+    const sLeft  = A - arcDeg;   // arc ends at the pin
+    const sRight = A;            // arc starts at the pin
+    arcsG.appendChild(path(smallArcPath(0,0,r, sLeft,  arcDeg), style)); // left (below)
+    arcsG.appendChild(path(smallArcPath(0,0,r, sRight, arcDeg), style)); // right (above)
   }
 
   // update(t, sunLonGeo, nodeAsc?, nodeDesc?)
