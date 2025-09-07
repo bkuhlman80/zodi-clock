@@ -3,11 +3,12 @@ import { loadEphemeris, getEphemFor } from "./ephemeris.js";
 import { drawWheel } from "./wheel.js";
 import { drawSeasons, updateSeasons } from "./seasons.js";
 import { initNodes } from "./nodes.js";
-import { solarLonDeg, buildCtx } from "./engine.js"; // you already have helpers here
 
+// simple app state held here (no separate state.js/loop.js)
 let rafId = 0, last = 0;
 const State = { mode: "frozen", t: new Date(), speed: 60 };
 
+// util
 function toLocalInputValue(d){
   const z = new Date(d);
   const pad = n => String(n).padStart(2,"0");
@@ -16,17 +17,45 @@ function toLocalInputValue(d){
   return `${yyyy}-${mm}-${dd}T${hh}:${mi}:${ss}`;
 }
 
+// minimal ctx builder
+function makeCtx(svg){
+  return { svg, layers: {}, state: {}, ephem: null };
+}
+
+function ensureSvg(host){
+  let svg = host.querySelector("svg");
+  if (!svg) {
+    svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    // basic viewport; adjust if you already set elsewhere
+    svg.setAttribute("viewBox", "-240 -240 480 480");
+    svg.setAttribute("width", "100%");
+    svg.setAttribute("height", "100%");
+    host.appendChild(svg);
+  }
+  return svg;
+}
+
 function render(ctx){
   const dayKey = State.t.toISOString().slice(0,10);
-  ctx.ephem = getEphemFor(dayKey);                    // attach for layers that read ctx.ephem
-  const sunLon = solarLonDeg(State.t);
+  ctx.ephem = getEphemFor(dayKey) || ctx.ephem; // keep last if missing row
 
-  // static once
-  if (!ctx.layers.wheel) { drawWheel(ctx); drawSeasons(ctx); ctx.layers.nodesAPI = initNodes(ctx); }
+  // draw static layers once
+  if (!ctx.layers.wheel) {
+    drawWheel(ctx);
+    drawSeasons(ctx);
+    ctx.layers.nodesAPI = initNodes(ctx);
+  }
 
-  // dynamic layers
+  // dynamic updates
   updateSeasons(ctx, State.t);
-  ctx.layers.nodesAPI.update(sunLon, ctx.ephem.node_true_asc, ctx.ephem.node_true_desc);
+
+  // nodes: pass NaN for sun longitude if you haven't exposed it yet → no highlight
+  const sunLon = Number.NaN;
+  if (ctx.ephem && ctx.layers.nodesAPI) {
+    const asc = ctx.ephem.node_true_asc;
+    const dsc = ctx.ephem.node_true_desc;
+    if (asc != null && dsc != null) ctx.layers.nodesAPI.update(sunLon, asc, dsc);
+  }
 }
 
 function tick(ts, ctx){
@@ -39,9 +68,10 @@ function tick(ts, ctx){
 
 async function start(){
   await loadEphemeris();
-  const el = document.querySelector("zodi-clock");           // your custom element exists
-  const svg = el.querySelector("svg") || el.attachShadow?.() || el; // adapt if you wrap
-  const ctx = buildCtx(svg);                                 // your engine creates {svg,layers,state,...}
+
+  const host = document.querySelector("zodi-clock") || document.body;
+  const svg = ensureSvg(host);
+  const ctx = makeCtx(svg);
 
   // controls
   const btnAnim   = document.getElementById("btn-anim");
