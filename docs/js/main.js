@@ -3,6 +3,7 @@ import { loadEphemeris, getEphemFor } from "./ephemeris.js";
 import { drawWheel } from "./wheel.js";
 import { drawSeasons, updateSeasons } from "./seasons.js";
 import { initNodes } from "./nodes.js";
+import { initBodies } from "./bodies.js";
 import { solarLonDeg } from "./engine.js";
 
 // simple app state held here (no separate state.js/loop.js)
@@ -45,10 +46,12 @@ function render(ctx){
     drawWheel(ctx);
     drawSeasons(ctx);
     ctx.layers.nodesAPI = initNodes(ctx);
+    ctx.layers.bodiesAPI = initBodies(ctx);
   }
 
   // dynamic updates
   updateSeasons(ctx, State.t);
+  if (ctx.layers.bodiesAPI) ctx.layers.bodiesAPI.update(State.t);
 
   // nodes: pass NaN for sun longitude if you haven't exposed it yet → no highlight
   const sunLon = solarLonDeg(State.t);

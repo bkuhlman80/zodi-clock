@@ -95,3 +95,10 @@ export function solarLonDeg(date) {
   const ecl = Astronomy.Ecliptic(equ.vec);
   return (ecl.elon + 360) % 360;
 }
+
+export function moonLonDeg(date){
+  // geocentric ecliptic longitude of the Moon, degrees
+  const equ = Astronomy.Equator(Astronomy.Body.Moon, date, new Astronomy.Observer(0,0,0), true, true);
+  const ecl = Astronomy.Ecliptic(equ.vec);
+  return (ecl.elon + 360) % 360;
+}
