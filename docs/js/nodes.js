@@ -98,10 +98,12 @@ export function initNodes(ctx){
         "stroke-opacity": highlight ? 0.65 : 0.35
     };
 
-    const A = toSceneDeg(nodeLon);        // scene angle of the pin
-    // one arc each side of the node, same start A, opposite directions
-    arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A, +arcDeg), style)); // CW
-    arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A, -arcDeg), style)); // CCW
+    const A = toSceneDeg(nodeLon);
+    const half = arcDeg / 2;
+    // Left bracket: from A-arcDeg to A-half
+    arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A - arcDeg, +half), style));
+    // Right bracket: from A+half to A+arcDeg
+    arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A + half, +half), style));
     }
 
   // update(t, sunLonGeo, nodeAsc?, nodeDesc?)
