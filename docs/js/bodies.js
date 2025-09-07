@@ -2,7 +2,7 @@
 import { COLORS, RADIUS, FONT_SYM, SIGNS } from "./constants.js";
 import { group, circle, line, text, polar } from "./svg.js";
 import { toSceneDeg, norm360 } from "./math.js";
-import { solarLonDeg, lunarLonDeg } from "./engine.js";
+import { solarLonDeg, fastMoonLon } from "./engine.js";
 
 function fmtZodiac(lon){
   const L = norm360(lon);
@@ -33,7 +33,7 @@ export function initBodies(ctx){
   function update(t){
     // longitudes (geocentric, ecliptic)
     const sLon = solarLonDeg(t);
-    const mLon = lunarLonDeg(t);
+    const mLon = fastMoonLon(t);
 
     // rays to outer ring
     const [sx, sy] = polar(0,0,RADIUS.outer, toSceneDeg(sLon));
