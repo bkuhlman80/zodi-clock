@@ -24,22 +24,35 @@ export function preciseLongitudes(date) {
   const moonEcl = A.Ecliptic(moonVec);
   return { sunLon: sunEcl.elon, moonLon: moonEcl.elon };
 }
+// normalize any input into a Date
+function asDate(t) { return (t instanceof Date) ? t : new Date(t); }
 
-/** Fast approximate Sun longitude for animation. */
-export function fastSunLon(d) {
-  const y = d.getUTCFullYear();
-  let eq = marchEquinoxApprox(y);
-  if (d < eq) eq = marchEquinoxApprox(y - 1);
-  const dtDays = (d - eq) / DAY;
-  return ((dtDays / YEAR_DAYS) * 360) % 360;
+// Sun ecliptic longitude [0,360)
+export function fastSunLon(t) {
+  const d = asDate(t);
+  if (globalThis.Astronomy) {
+    const time = new Astronomy.AstroTime(d);
+    const vec  = Astronomy.GeoVector('Sun', time, /*aberration*/ true);
+    const ecl  = Astronomy.Ecliptic(vec);
+    return ((ecl.elon % 360) + 360) % 360;
+  }
+  // fallback to your precise routine if present in this file
+  return ((solarLonDeg(d) % 360) + 360) % 360;
 }
 
-/** Fast approximate Moon longitude from phase progression relative to Sun. */
-export function fastMoonLon(d, sunLon) {
-  const frac = moonPhaseAge(d) / MOON_SYNODIC_DAYS; // 0..1
-  const lon = (sunLon + frac * 360) % 360;
-  return (lon + 360) % 360;
+// Moon ecliptic longitude [0,360)
+export function fastMoonLon(t) {
+  const d = asDate(t);
+  if (globalThis.Astronomy) {
+    const time = new Astronomy.AstroTime(d);
+    const vec  = Astronomy.GeoVector('Moon', time, /*aberration*/ true);
+    const ecl  = Astronomy.Ecliptic(vec);
+    return ((ecl.elon % 360) + 360) % 360;
+  }
+  // no Astronomy available → signal failure
+  return NaN;
 }
+
 
 /** Moon phase age in days since NEW_MOON_REF, wrapped to synodic month. */
 export function moonPhaseAge(d) {
@@ -65,7 +78,7 @@ export function phaseName(ageDays) {
 
 /** Seasons for a given year via Astronomy.Seasons with cross-build key safety. */
 export function seasonsUTC(year) {
-  const A = window.Astronomy;
+  const A = globalThis.Astronomy;
   if (!A || !A.Seasons) return { MarEq:null, JunSol:null, SepEq:null, DecSol:null };
   const s = A.Seasons(year);
   const pick = (obj, names) => { for (const n of names) if (obj && obj[n] != null) return obj[n]; return null; };
@@ -89,16 +102,18 @@ export function nextSeason(nowIso, seasonsMap) {
   const [key, when] = future.length ? future[0] : entries.sort((a,b)=>a[1]-b[1])[0];
   return { key, when, days: (when - now) / DAY };
 }
-
-export function solarLonDeg(date) {
-  const equ = Astronomy.Equator(Astronomy.Body.Sun, date, new Astronomy.Observer(0,0,0), true, true);
-  const ecl = Astronomy.Ecliptic(equ.vec);
+export function solarLonDeg(date){
+  const A = globalThis.Astronomy;
+  const t = new A.AstroTime(date);
+  const vec = A.GeoVector(A.Body.Sun, t, /*aberration*/ true);
+  const ecl = A.Ecliptic(vec);
   return (ecl.elon + 360) % 360;
 }
 
 export function moonLonDeg(date){
-  // geocentric ecliptic longitude of the Moon, degrees
-  const equ = Astronomy.Equator(Astronomy.Body.Moon, date, new Astronomy.Observer(0,0,0), true, true);
-  const ecl = Astronomy.Ecliptic(equ.vec);
+  const A = globalThis.Astronomy;
+  const t = new A.AstroTime(date);
+  const vec = A.GeoVector(A.Body.Moon, t, /*aberration*/ true);
+  const ecl = A.Ecliptic(vec);
   return (ecl.elon + 360) % 360;
 }
