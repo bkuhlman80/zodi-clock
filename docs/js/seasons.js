@@ -1,110 +1,46 @@
 // docs/js/seasons.js
 import { COLORS, RADIUS } from "./constants.js";
-import { group, badge, polar, path, text } from "./svg.js";
-import { seasonsUTC, nextSeason } from "./engine.js";
+import { group, line, text, svgEl, polar } from "./svg.js";
+import { toSceneDeg } from "./math.js";
 
-/** Create seasons layer group on ctx.svg. */
-export function drawSeasons(ctx) {
-  const g = group({ id: "seasons" });
-  ctx.svg.appendChild(g);
-  ctx.layers.seasons = g;
-}
+const SEASONS = [
+  { key: "Mar", deg:   0, glyph: "△" },  // March equinox
+  { key: "Jun", deg:  90, glyph: "◇" },  // June solstice
+  { key: "Sep", deg: 180, glyph: "▽" },  // September equinox
+  { key: "Dec", deg: 270, glyph: "◇" },  // December solstice
+];
 
-/** Update pins, chips, and proximity tag on outer ring. */
-export function updateSeasons(ctx, now) {
-  const g = ctx.layers.seasons;
-  if (!g) return;
-  g.replaceChildren();
+export function drawSeasons(ctx){
+  ctx.layers ||= {};
+  const L = ctx.layers;
+  L.seasons ||= {};
 
-  // 4 canonical spokes with types
-  const SPOKES = [
-    { key: "MarEq", lon: 0,   chip: "Mar", full: "March Equinox",     type: "eq"  },
-    { key: "JunSol",lon: 90,  chip: "Jun", full: "June Solstice",     type: "sol" },
-    { key: "SepEq", lon: 180, chip: "Sep", full: "September Equinox", type: "eq"  },
-    { key: "DecSol",lon: 270, chip: "Dec", full: "December Solstice", type: "sol" },
-  ];
+  const root  = L.seasons.root  ??= group({ id:"seasons" });
+  const ticks = L.seasons.ticks ??= group({ class:"season-ticks" });
+  const labs  = L.seasons.labels??= group({ class:"season-labels" });
 
-  // season dates
-  const yr = now.getUTCFullYear();
-  let seas = seasonsUTC(yr);                // {MarEq, JunSol, SepEq, DecSol}
-  if (!seas?.MarEq && ctx.ephem?.seasons) seas = ctx.ephem.seasons;
+  if (!root.parentNode){ ctx.svg.appendChild(root); root.append(ticks, labs); }
 
-  // proximity window ±3 days
-  const nxt = seas ? nextSeason(now.toISOString(), seas) : { key:null, when:null, days:Infinity };
-  const proxActive = Number.isFinite(nxt.days) && Math.abs(nxt.days) <= 3;
+  // ticks and labels just outside zodiac
+  ticks.replaceChildren();
+  labs.replaceChildren();
 
-  // ring radius just outside zodiac
-  const ringR = (RADIUS.season ?? (RADIUS.zodiac + 12));
-  const styles = {
-    eq:  { stroke: "#64D2FF" },  // diamond
-    sol: { stroke: "#FFD166" },  // triangle
-  };
+  const tickLen = 10;
+  for (const s of SEASONS){
+    const a = toSceneDeg(s.deg);
+    const [x1,y1] = polar(0,0,RADIUS.zodiac, a);
+    const [x2,y2] = polar(0,0,RADIUS.zodiac + tickLen, a);
+    ticks.appendChild(line(x1,y1,x2,y2,{ stroke: COLORS.seasonTick || COLORS.ring, "stroke-width": 2 }));
 
-  for (const s of SPOKES) {
-    // pin at ringR
-    const [px, py] = polar(0, 0, ringR, s.lon);
-    drawSeasonPin(g, px, py, s.type, styles[s.type].stroke);
-
-    // chip just beyond pin
-    const [bx, by] = polar(0, 0, ringR + 18, s.lon);
-    const isNext = proxActive && nxt.key === s.key;
-    badge(g, bx, by, {
-      label: s.chip,
-      fg: "#0b0c10",
-      bg: isNext ? COLORS.badgeHi : COLORS.badgeBG,
-      size: 11, pad: 5, r: 7,
-    });
-
-    // optional date tag under chip when within ±3 days
-    if (isNext && nxt.when instanceof Date) {
-      const iso = nxt.when.toISOString().slice(0,10);
-      const scale = 1 + (1 - Math.abs(nxt.days)/3) * 0.35;
-      const tag = badge(g, bx, by + 16, {
-        label: iso, fg: COLORS.text, bg: "transparent", size: 10, pad: 2, r: 4
-      });
-      tag.setAttribute(
-        "transform",
-        `translate(${bx},${by}) scale(${scale}) translate(${-bx},${-by})`
-      );
-    }
-  }
-
-  // legend once
-  if (!ctx.layers._legendDrawn) {
-    drawSeasonLegend(g, ringR);
-    ctx.layers._legendDrawn = true;
+    // label and glyph side-by-side
+    const [lx,ly] = polar(0,0,RADIUS.season, a);
+    const g = group();
+    const t = text(lx, ly, s.key, { "font-size": 12, fill: COLORS.text, "text-anchor":"end" });
+    const sym = text(lx + 16, ly, s.glyph, { "font-size": 12, fill: COLORS.text });
+    g.appendChild(t); g.appendChild(sym);
+    labs.appendChild(g);
   }
 }
 
-/* helper: draw diamond (equinox) or triangle (solstice) */
-function drawSeasonPin(g, x, y, kind, stroke) {
-  const s = 8; // size
-  const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  p.setAttribute("fill", "none");
-  p.setAttribute("stroke", stroke);
-  p.setAttribute("stroke-width", "2");
-  p.setAttribute("stroke-linejoin", "round");
-
-  if (kind === "eq") {
-    p.setAttribute("d", `M ${x} ${y - s} L ${x + s} ${y} L ${x} ${y + s} L ${x - s} ${y} Z`);
-  } else {
-    p.setAttribute("d", `M ${x} ${y - s} L ${x + s} ${y + s} L ${x - s} ${y + s} Z`);
-  }
-  g.appendChild(p);
-}
-
-function drawSeasonLegend(g, ringR) {
-  // anchor ~30° from top toward right, outside ring
-  const [lx, ly] = polar(0, 0, ringR + 42, 30);
-
-  // diamond
-  const d1 = `M ${lx} ${ly-6} L ${lx+6} ${ly} L ${lx} ${ly+6} L ${lx-6} ${ly} Z`;
-  g.appendChild(path(d1, { fill: "none", stroke: "#64D2FF", "stroke-width": 2 }));
-  g.appendChild(text(lx + 18, ly, "Equinox", { "font-size": 11, fill: "#e6e7eb", "text-anchor": "start" }));
-
-  // triangle
-  const ty = ly + 18;
-  const d2 = `M ${lx} ${ty-6} L ${lx+6} ${ty+6} L ${lx-6} ${ty+6} Z`;
-  g.appendChild(path(d2, { fill: "none", stroke: "#FFD166", "stroke-width": 2 }));
-  g.appendChild(text(lx + 18, ty, "Solstice", { "font-size": 11, fill: "#e6e7eb", "text-anchor": "start" }));
-}
+// kept for API symmetry; nothing dynamic right now
+export function updateSeasons(_ctx,_t){}

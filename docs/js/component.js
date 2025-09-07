@@ -5,7 +5,7 @@ import { drawWheel } from "./wheel.js";
 import { drawSeasons, updateSeasons } from "./seasons.js";
 import { initNodes } from "./nodes.js";
 import { initBodies } from "./bodies.js";
-import { earthHelioLon, solarLonDeg, fastMoonLon } from "./engine.js";
+import { earthHelioLon } from "./engine.js";
 
 // ~2.95 days/sec → year ≈123.7 s, synodic month ≈10 s
 const State = { mode: "frozen", t: new Date(), speed: 255000 };
@@ -97,12 +97,11 @@ export class ZodiClock extends HTMLElement {
     updateSeasons(this._ctx, State.t);
     if (this._ctx.layers.bodiesAPI) this._ctx.layers.bodiesAPI.update(State.t);
 
-    // Nodes (use true nodes from ephemeris)
-    const e = this._ctx.ephem;
-    if (e && this._ctx.layers.nodesAPI && e.node_true_asc != null && e.node_true_desc != null){
-      // Sun geocentric = Earth heliocentric + 180
-      const sunLonGeo = (earthHelioLon(State.t) + 180) % 360;
-      this._ctx.layers.nodesAPI.update(sunLonGeo, e.node_true_asc, e.node_true_desc);
+    // Nodes: prefer ephemeris true nodes; fallback to mean node inside nodes.js
+   if (this._ctx.layers.nodesAPI){
+      const e = this._ctx.ephem || {};
+      const sunLonGeo = (earthHelioLon(State.t) + 180) % 360; // geocentric Sun
+      this._ctx.layers.nodesAPI.update(State.t, sunLonGeo, e.node_true_asc, e.node_true_desc);
     }
   }
 

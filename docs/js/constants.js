@@ -9,14 +9,14 @@ export const VS  = "\uFE0E";
 export const FONT_SYM =
   "system-ui,'Apple Symbols','Segoe UI Symbol','Noto Sans Symbols 2','Noto Sans Symbols','Symbola',sans-serif";
 
-  export const RADIUS = {
-  zodiac: 350,
-  outer: 350,
-  season: 362,
-  earth: 170,
+export const RADIUS = {
+  zodiac: 330,        // slightly smaller to leave room for season labels
+  outer: 330,
+  season: 348,        // label radius just outside zodiac
+  earth: 160,
   moon: 50,
-  nodes: 220,          // 170 + 50
-  signLabel: 300
+  nodes: 322,         // near the outer ring for visibility
+  signLabel: 285
 };
 
 export const COLORS = {
