@@ -1,5 +1,5 @@
 // docs/js/nodes.js
-import { COLORS, RADIUS, FONT_SYM, SIGNS } from "./constants.js";
+import { COLORS, RADIUS, ECLIPSE_CORRIDOR_DEG, FONT_SYM, SIGNS } from "./constants.js";
 import { group, text, path, polar, arcPath } from "./svg.js";
 import { angDiff, toSceneDeg, norm360 } from "./math.js";
 
