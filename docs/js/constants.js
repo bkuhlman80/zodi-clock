@@ -1,27 +1,35 @@
 // docs/js/constants.js
-
-export const TAU = Math.PI * 2; 
+export const TAU = Math.PI * 2;
 export const DEG = Math.PI / 180;
-export const EPS = 1e-6; 
+export const EPS = 1e-6;
 export const ECLIPSE_CORRIDOR_DEG = 18.5;
 
-// Orientation: 0° Aries at top, clockwise.
-export const EMO = "\uFE0F";           // emoji presentation selector
-export const VS  = "\uFE0E";           // text presentation selector
-export const FONT_SYM = "system-ui,'Apple Symbols','Segoe UI Symbol','Noto Sans Symbols 2','Noto Sans Symbols','Symbola',sans-serif";
+export const EMO = "\uFE0F";
+export const VS  = "\uFE0E";
+export const FONT_SYM =
+  "system-ui,'Apple Symbols','Segoe UI Symbol','Noto Sans Symbols 2','Noto Sans Symbols','Symbola',sans-serif";
+
 export const RADIUS = {
-  zodiac: 350,                 // outer ring
-  season: 362,                 // just outside zodiac (zodiac + 12, adjust as needed)
-  earth: 170,                  // Earth orbit radius
-  moon: 50,                    // Moon orbit radius
-  nodes: 170 + 50              // same as earth + moon
+  zodiac: 350,          // outer zodiac ring
+  outer: 350,           // alias used by rays
+  season: 362,          // ticks just outside zodiac
+  earth: 170,
+  moon: 50,
+  nodes: 170 + 50,
+  signLabel: 300        // where sign NAMES are drawn (mid-slice)
 };
+
 export const COLORS = {
   bg: "#0f1218", ring: "#2a2f39", text: "#e6e7eb",
   sun: "#f5b301", earth: "#3b82f6", moon: "#9aa3af",
   nodePin: "#e6e7eb", nodeArc: "#f8961e", nodeArcHi: "#f3722c",
   seasonTick: "#2a2f39", badgeBG: "#cbd1db", badgeHi: "#f5b301",
 };
+
 export const SIGNS = ["♈︎","♉︎","♊︎","♋︎","♌︎","♍︎","♎︎","♏︎","♐︎","♑︎","♒︎","♓︎"];
-export const SIGN_NAMES = ["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];
-export const GLYPH = { nodeAsc: "☊", nodeDesc: "☋", };
+export const SIGN_NAMES = [
+  "Aries","Taurus","Gemini","Cancer","Leo","Virgo",
+  "Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"
+];
+
+export const GLYPH = { nodeAsc: "☊", nodeDesc: "☋" };

@@ -49,7 +49,7 @@ export class ZodiClock extends HTMLElement {
     // 3) static layers once
     drawWheel(this._ctx);
     drawSeasons(this._ctx);
-    this._ctx.layers.nodesAPI = initNodes(this._ctx);
+    this._ctx.layers.nodesAPI  = initNodes(this._ctx);
     this._ctx.layers.bodiesAPI = initBodies(this._ctx);
 
     // 4) ephemeris
@@ -109,8 +109,12 @@ export class ZodiClock extends HTMLElement {
         <span style="font-size:12px;opacity:.8">UTC</span>
         <input id="c-dt" type="datetime-local" step="1" />
       </label>
+      <span id="r-sun"  style="font:600 12px system-ui;opacity:.9"></span>
+      <span id="r-moon" style="font:600 12px system-ui;opacity:.9;margin-left:8px"></span>
     `;
     this._host.prepend(bar);
+    this._ctx.readoutSun  = bar.querySelector("#r-sun");
+    this._ctx.readoutMoon = bar.querySelector("#r-moon");
 
     const dt = bar.querySelector("#c-dt");
     dt.value = toLocalInputValue(State.t);
