@@ -44,6 +44,7 @@ export class ZodiClock extends HTMLElement {
     // 2) build svg + ctx inside shadow DOM
     const svg = ensureSvg(this._host);
     this._ctx = makeCtx(svg);
+    this._ctx.layers ||= {}; 
 
     // 3) static layers once
     drawWheel(this._ctx);

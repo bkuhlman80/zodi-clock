@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,11 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Z0DI Clock</title>
 
-  <!-- favicon -->
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <link rel="alternate icon" type="image/png" href="./favicon.png" sizes="32x32">
 
-  <!-- Open Graph -->
   <meta property="og:title" content="Z0DI Clock" />
   <meta property="og:description" content="Animated tropical zodiac clock. Year 123.7 s. Moon synodic 10 s. Frozen mode uses precise ephemeris." />
   <meta property="og:image" content="https://bkuhlman80.github.io/zodi-clock/preview.png?v=3" />
@@ -18,40 +15,17 @@
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
 
-  <!-- Scripts -->
-<!-- keep Astronomy global -->
-<script defer src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js"></script>
-<script type="module" src="./js/component.js?v=20250907-4"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js"></script>
+  <script type="module" src="./js/component.js?v=20250907-5"></script>
 
-<zodi-clock initial-mode="animated" initial-dt="2025-09-06T12:00:00Z"></zodi-clock>
-
-
-  <!-- Controls above Z0DI Clock -->
-  <div id="controls" class="controls">
-    <button id="btn-anim">Animated</button>
-    <button id="btn-frozen">Frozen</button>
-    <input id="dt-input" type="datetime-local" step="1">
-  </div>
-  <zodi-clock></zodi-clock>
-  <style>
-  .controls{display:flex;gap:.5rem;align-items:center;margin:12px 0}
-  .controls button{font:600 14px system-ui;padding:10px 14px;border-radius:10px;border:1px solid #444}
-  .controls input{font:500 14px system-ui;padding:8px 10px;border-radius:10px;border:1px solid #444;min-width:280px}
-  @media (min-width:768px){
-    .controls button{font-size:16px;padding:12px 16px}
-    .controls input{font-size:16px;padding:10px 12px;min-width:360px}
-  }
-  </style>
-
-  <!-- Minimal styles for the host page (component styles live in clock.js) -->
   <style>
     :root { --bg:#0b0c10; --panel:#111318; --text:#e6e7eb; --muted:#9aa0aa; }
     body { margin:0; background:var(--bg); color:var(--text);
-           font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
-    .wrap { max-width: 1080px; margin: 0 auto; padding: 24px; }
-    h1 { font-size: 24px; margin: 0 0 12px; }
-    .panel { background: var(--panel); border:1px solid #1c1f26; border-radius:16px; padding:12px; }
-    .notice { color: var(--muted); font-size: 12px; margin-top: 8px; }
+           font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; }
+    .wrap { max-width:1080px; margin:0 auto; padding:24px; }
+    h1 { font-size:24px; margin:0 0 12px; }
+    .panel { background:var(--panel); border:1px solid #1c1f26; border-radius:16px; padding:12px; }
+    .notice { color:var(--muted); font-size:12px; margin-top:8px; }
     a { color:#8ab4ff; }
   </style>
 </head>
@@ -59,7 +33,8 @@
   <div class="wrap">
     <h1>Z0DI Clock</h1>
     <div class="panel">
-      <zodi-clock style="display:block; width:100%; max-width:960px;"></zodi-clock>
+      <zodi-clock style="display:block;width:100%;max-width:960px;"
+                  initial-mode="animated"></zodi-clock>
       <p class="notice">This is a (counter-)clock, not a cosmology. Geocentric display, heliocentric physics. 0° Aries at the top. Frozen mode uses precise ephemeris.</p>
     </div>
   </div>
