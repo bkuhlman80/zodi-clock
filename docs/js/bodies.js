@@ -32,10 +32,13 @@ export function initBodies(ctx){
   objs.append(earthDot, sunDot, moonDot);
   rays.append(sunRay, moonRay);
 
+  let lastLog = 0;
   function update(t){
     const sLon = fastSunLon(t);
     const mLon = fastMoonLon(t);
     if (!Number.isFinite(sLon) || !Number.isFinite(mLon)) return; // avoid NaN spam
+    const now = performance.now();
+    if (now - lastLog > 1000) { /* console.log('lon', sLon, mLon); */ lastLog = now; }
 
     // Sun dot on Earth ring
     const [sx, sy] = polar(0,0,RADIUS.earth, toSceneDeg(sLon));
