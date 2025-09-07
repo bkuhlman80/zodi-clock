@@ -5,7 +5,7 @@ import { drawWheel } from "./wheel.js";
 import { drawSeasons, updateSeasons } from "./seasons.js";
 import { initNodes } from "./nodes.js";
 import { initBodies } from "./bodies.js";
-import { solarLonDeg, fastMoonLon } from "./engine.js";
+import { earthHelioLon, solarLonDeg, fastMoonLon } from "./engine.js";
 
 // ~2.95 days/sec → year ≈123.7 s, synodic month ≈10 s
 const State = { mode: "frozen", t: new Date(), speed: 255000 };
@@ -55,8 +55,8 @@ export class ZodiClock extends HTMLElement {
     // Static layers
     drawWheel(this._ctx);
     drawSeasons(this._ctx);
-    this._ctx.layers.nodesAPI  = initNodes(this._ctx);
     this._ctx.layers.bodiesAPI = initBodies(this._ctx);
+    this._ctx.layers.nodesAPI  = initNodes(this._ctx);
 
     // Ephemeris table (for nodes)
     await loadEphemeris();
@@ -74,15 +74,6 @@ export class ZodiClock extends HTMLElement {
     // Initial draw so dots/rays aren't at (0,0)
     if (this._ctx.layers.bodiesAPI) this._ctx.layers.bodiesAPI.update(State.t);
     this._renderFrame();
-
-    // Debug hooks for testing
-    const self = this;
-    this.api = {
-      get state(){ return State; },
-      get ctx(){ return self._ctx; },
-      step(ms){ advance(ms); self._renderFrame(); },
-      longs(){ return { s: solarLonDeg(State.t), m: fastMoonLon(State.t) }; }
-    };
 
     // RAF loop
     const tick = (ts)=>{
@@ -109,8 +100,9 @@ export class ZodiClock extends HTMLElement {
     // Nodes (use true nodes from ephemeris)
     const e = this._ctx.ephem;
     if (e && this._ctx.layers.nodesAPI && e.node_true_asc != null && e.node_true_desc != null){
-      const sunLon = solarLonDeg(State.t);
-      this._ctx.layers.nodesAPI.update(sunLon, e.node_true_asc, e.node_true_desc);
+      // Sun geocentric = Earth heliocentric + 180
+      const sunLonGeo = (earthHelioLon(State.t) + 180) % 360;
+      this._ctx.layers.nodesAPI.update(sunLonGeo, e.node_true_asc, e.node_true_desc);
     }
   }
 

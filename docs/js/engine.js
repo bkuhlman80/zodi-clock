@@ -53,6 +53,15 @@ export function fastMoonLon(t) {
   return NaN;
 }
 
+// Earth heliocentric ecliptic longitude [0,360)
+export function earthHelioLon(t){
+  const d = asDate(t);
+  const A = globalThis.Astronomy;
+  const time = new A.AstroTime(d);
+  const vec  = A.HelioVector(A.Body.Earth, time);
+  const ecl  = A.Ecliptic(vec);
+  return ((ecl.elon % 360) + 360) % 360;
+}
 
 /** Moon phase age in days since NEW_MOON_REF, wrapped to synodic month. */
 export function moonPhaseAge(d) {

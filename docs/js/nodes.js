@@ -85,7 +85,7 @@ export function initNodes(ctx) {
         fill: "none",
         stroke: highlight ? (COLORS.nodeArcHi || "rgba(255,255,255,0.9)")
                           : (COLORS.nodeArc   || "rgba(255,255,255,0.35)"),
-        "stroke-width": 3,
+        "stroke-width": 4,
         "stroke-linecap": "round",
       })
     );
@@ -105,8 +105,8 @@ export function initNodes(ctx) {
     // pins
     const [ax, ay] = polar(0, 0, RADIUS.nodes, toSceneDeg(nodeAsc));
     const [dx, dy] = polar(0, 0, RADIUS.nodes, toSceneDeg(nodeDesc));
-    pinsG.appendChild(text(ax, ay, "☊", { "font-size": 16, fill: COLORS.nodePin || COLORS.text, "font-family": FONT_SYM }));
-    pinsG.appendChild(text(dx, dy, "☋", { "font-size": 16, fill: COLORS.nodePin || COLORS.text, "font-family": FONT_SYM }));
+    pinsG.appendChild(text(ax, ay, "☊", { "font-size": 18, fill: COLORS.nodePin || COLORS.text, "font-family": FONT_SYM }));
+    pinsG.appendChild(text(dx, dy, "☋", { "font-size": 18, fill: COLORS.nodePin || COLORS.text, "font-family": FONT_SYM }));
 
     // keep any active micro-label on top
     if (ctx.state.nodeLabel) labelG.appendChild(ctx.state.nodeLabel);
