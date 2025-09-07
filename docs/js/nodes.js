@@ -81,32 +81,23 @@ export function initNodes(ctx){
     return `M ${x1} ${y1} A ${r} ${r} 0 ${large} ${sweep} ${x2} ${y2}`;
     }
 
+       // Full arc with gap at pin (concave, CW) 
     function drawNodeArcsPair(nodeLon, highlight){
-    const rArc   = RADIUS.nodes - 8;               // keep your current inset
-    const arcLen = 63;                             
-    const arcDeg = arcLen * 360 / (2 * Math.PI * rArc);
-
-    // small visual gap so they don’t “hinge” at the pin (≈2 px)
-    const gapPx  = 2;
-    const gapDeg = gapPx * 360 / (2 * Math.PI * rArc);
-
-    const style = {
-        fill:"none",
+        const rArc   = RADIUS.nodes - 8;                                // keep your inset
+        const arcLen = 63;
+        const total  = arcLen * 360 / (2 * Math.PI * rArc);             // ≈18°
+        const half   = total / 2;
+        const gapPx  = 2;
+        const gapDeg = gapPx * 360 / (2 * Math.PI * rArc);              // tiny gap at pin
+        const style = { fill:"none",
         stroke: highlight ? (COLORS.nodeArcHi || "#f3722c") : (COLORS.nodeArc || "#f8961e"),
-        "stroke-width": 0.6,
-        "stroke-linecap": "round",
-        "stroke-opacity": highlight ? 0.65 : 0.35
-    };
-
-    const A = toSceneDeg(nodeLon);                 // scene angle of pin
-    // Left: ends just before the pin (concave, CW)
-    arcsG.appendChild(path(
-        smallArcPathSigned(0,0,rArc, A - arcDeg, +(arcDeg - gapDeg)), style));
-
-    // Right: starts just after the pin (concave, CW)
-    arcsG.appendChild(path(
-        smallArcPathSigned(0,0,rArc, A + gapDeg, +(arcDeg - gapDeg)), style));
-    }
+        "stroke-width": 0.6, "stroke-linecap":"round", "stroke-opacity": highlight ? 0.65 : 0.35 };
+        const A = toSceneDeg(nodeLon);
+        // Left arc: CCW from just before the pin
+        arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A - gapDeg, -half), style));
+        // Right arc: CW from just after the pin
+        arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A + gapDeg, +half), style));
+        }
 
 
   // update(t, sunLonGeo, nodeAsc?, nodeDesc?)
