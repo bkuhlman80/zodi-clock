@@ -7,23 +7,11 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 
   <!-- Scripts -->
-  <script>
-  (function loadAstronomy(i=0){
-    const srcs = [
-      "https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js",
-      "https://unpkg.com/astronomy-engine@2/astronomy.browser.min.js",
-      "https://esm.run/astronomy-engine@2/astronomy.browser.min.js"
-    ];
-    if (i >= srcs.length) { console.error("Astronomy failed to load"); return; }
-    const s = document.createElement("script");
-    s.defer = true;
-    s.src = srcs[i] + "?v=20250906";
-    s.onload = () => console.log("Astronomy loaded from", s.src, !!window.Astronomy);
-    s.onerror = () => { console.warn("fail", s.src); loadAstronomy(i+1); };
-    document.head.appendChild(s);
-    })();
-  </script>
-  <script type="module" src="./js/main.js?v=20250906-1"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js"></script>
+<script type="module" src="./js/state.js"></script>
+<script type="module" src="./js/loop.js"></script>
+<script type="module" src="./js/main.js?v=20250906-2"></script>
+
 
 
   <!-- Controls above Z0DI Clock -->
@@ -42,7 +30,7 @@
     .controls input{font-size:16px;padding:10px 12px;min-width:360px}
   }
   </style>
-  
+
   <!-- Slim host styling -->
   <style>
     html,body { margin:0; background:#0f1218; color:#e6e7eb;
