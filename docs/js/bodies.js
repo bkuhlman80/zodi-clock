@@ -34,7 +34,7 @@ export function initBodies(ctx){
   if (!root.parentNode){ ctx.svg.append(root); root.append(rays, objs); }
 
   // Sizes: Sun ≈ 4× Earth; Earth ≈ 2× Moon
-  const R_SUN = 40, R_EARTH = 10, R_MOON = 5;
+  const R_SUN = 30, R_EARTH = 12, R_MOON = 6;
 
   // Sun at center
   const sunDot   = circle(0,0,R_SUN,{ fill: COLORS.sun || "#f5b301" });
@@ -49,8 +49,8 @@ export function initBodies(ctx){
   });
 
   // Rays that START at Earth and point to Sun/Moon then to outer ring
-  const sunRay  = line(0,0,0,0,{ stroke: COLORS.sun || "#f5b301", "stroke-width":1.5 });
-  const moonRay = line(0,0,0,0,{ stroke: "#ffffff", "stroke-width":1.2, opacity:.95 });
+  const sunRay  = line(0,0,0,0,{ stroke: COLORS.sun || "#f5b301", "stroke-width":1.2 });
+  const moonRay = line(0,0,0,0,{ stroke: "#ffffff", "stroke-width":1.0, opacity:.95 });
 
   objs.append(sunDot, moonOrb, earthDot, moonDot);
   rays.append(sunRay, moonRay);

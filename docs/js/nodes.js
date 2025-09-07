@@ -1,5 +1,5 @@
 // docs/js/nodes.js
-import { COLORS, RADIUS, ECLIPSE_CORRIDOR_DEG, FONT_SYM, SIGNS } from "./constants.js";
+import { COLORS, RADIUS, FONT_SYM, SIGNS } from "./constants.js";
 import { group, text, path, polar, arcPath } from "./svg.js";
 import { angDiff, toSceneDeg, norm360 } from "./math.js";
 
@@ -70,17 +70,22 @@ export function initNodes(ctx){
     L.nodes.boundPointer = true;
   }
 
-  function drawNodeArc(nodeLon, highlight){
-    const a0 = toSceneDeg(nodeLon - ECLIPSE_CORRIDOR_DEG);
-    const a1 = toSceneDeg(nodeLon + ECLIPSE_CORRIDOR_DEG);
-    const d  = arcPath(0, 0, RADIUS.nodes, a0, a1);
-    arcsG.appendChild(path(d, {
-      fill: "none",
-      stroke: highlight ? (COLORS.nodeArcHi || "rgba(255,255,255,0.9)")
-                        : (COLORS.nodeArc   || "rgba(255,255,255,0.35)"),
-      "stroke-width": 4,
-      "stroke-linecap": "round",
-    }));
+  // two short arcs of 18° each, hugging the node symbol
+  const ARC_DEG = 18;
+  function drawNodeArcsPair(nodeLon, highlight){
+    const r = RADIUS.nodes - 2; // sit close to the pin
+    const mk = (s,e)=> {
+      const d = arcPath(0,0,r, toSceneDeg(s), toSceneDeg(e));
+      arcsG.appendChild(path(d, {
+        fill:"none",
+        stroke: highlight ? (COLORS.nodeArcHi || "#f3722c") : (COLORS.nodeArc || "#f8961e"),
+        "stroke-width": 0.6,                 // ≈ half of pointer lines
+        "stroke-linecap": "round",
+        "stroke-opacity": highlight ? 0.65 : 0.35
+      }));
+    };
+    mk(nodeLon - ARC_DEG, nodeLon);     // left
+    mk(nodeLon,           nodeLon + ARC_DEG); // right
   }
 
   // update(t, sunLonGeo, nodeAsc?, nodeDesc?)
@@ -97,14 +102,14 @@ export function initNodes(ctx){
     // arcs with corridor highlight
     const ascHi  = Math.abs(angDiff(sunLon, asc))  <= ECLIPSE_CORRIDOR_DEG;
     const descHi = Math.abs(angDiff(sunLon, desc)) <= ECLIPSE_CORRIDOR_DEG;
-    drawNodeArc(asc, ascHi);
-    drawNodeArc(desc, descHi);
+    drawNodeArcsPair(asc, ascHi);
+    drawNodeArcsPair(desc, descHi);
 
     // pins
     const [ax, ay] = polar(0, 0, RADIUS.nodes, toSceneDeg(asc));
     const [dx, dy] = polar(0, 0, RADIUS.nodes, toSceneDeg(desc));
-    pinsG.appendChild(text(ax, ay, "☊", { "font-size": 18, fill: COLORS.nodePin || COLORS.text, "font-family": FONT_SYM }));
-    pinsG.appendChild(text(dx, dy, "☋", { "font-size": 18, fill: COLORS.nodePin || COLORS.text, "font-family": FONT_SYM }));
+    pinsG.appendChild(text(ax, ay, "☊", { "font-size": 20, fill: COLORS.nodePin || COLORS.text, "font-family": FONT_SYM }));
+    pinsG.appendChild(text(dx, dy, "☋", { "font-size": 20, fill: COLORS.nodePin || COLORS.text, "font-family": FONT_SYM }));
 
     // keep any active micro-label on top
     if (ctx.state.nodeLabel) labelG.appendChild(ctx.state.nodeLabel);

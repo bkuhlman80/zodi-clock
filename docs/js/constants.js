@@ -13,9 +13,9 @@ export const RADIUS = {
   zodiac: 330,        // slightly smaller to leave room for season labels
   outer: 330,
   season: 348,        // label radius just outside zodiac
-  earth: 160,
-  moon: 50,
-  nodes: 322,         // near the outer ring for visibility
+  earth: 150,
+  moon: 45,
+  nodes: 200,         // near the outer ring for visibility
   signLabel: 285
 };
 
