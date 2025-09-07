@@ -90,9 +90,8 @@ export function nextSeason(nowIso, seasonsMap) {
   return { key, when, days: (when - now) / DAY };
 }
 
-export function solarLonDeg(date){
-  // True ecliptic longitude of the Sun, in degrees
-  const equ = Astronomy.Equator(Astronomy.Body.Sun, date, null, true, true);
-  const ecl = Astronomy.Ecliptic(equ.vec);      // converts to ecliptic
+export function solarLonDeg(date) {
+  const equ = Astronomy.Equator(Astronomy.Body.Sun, date, new Astronomy.Observer(0,0,0), true, true);
+  const ecl = Astronomy.Ecliptic(equ.vec);
   return (ecl.elon + 360) % 360;
 }
