@@ -124,9 +124,14 @@ export class ZodiClock extends HTMLElement {
     dt.value = toLocalInputValue(State.t);
     bar.querySelector("#c-anim").onclick = ()=> setMode("animated");
     bar.querySelector("#c-froz").onclick = ()=> setMode("frozen");
+    
     dt.addEventListener("change", e=>{
-      const iso = new Date(e.target.value).toISOString();
-      setTime(iso); setMode("frozen");
+      const v = e.target.value;
+      if (!v) return;                      // ignore empty value
+      const d = new Date(v);
+      if (isNaN(d)) return;                // avoid “Invalid time value”
+      setTime(d.toISOString());
+      setMode("frozen");
     });
 
     // give bodies.js readout spans

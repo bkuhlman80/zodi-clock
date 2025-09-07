@@ -70,39 +70,51 @@ export function initNodes(ctx){
     L.nodes.boundPointer = true;
   }
 
-  // two short arcs of 18° each, hugging the node symbol
-  const ARC_DEG = 18;
+  // two short arcs of fixed arc length ≈63 at r=200, hugging the node symbol, sun-centered
   function drawNodeArcsPair(nodeLon, highlight){
-    const r = RADIUS.nodes - 2; // sit close to the pin
+    const r = RADIUS.nodes;                  // r = 200 by constants
+    const arcLen = 63;                       // requested physical length
+    const arcDeg = (arcLen / (2 * Math.PI * r)) * 360;   // ≈18°
     const mk = (s,e)=> {
       const d = arcPath(0,0,r, toSceneDeg(s), toSceneDeg(e));
       arcsG.appendChild(path(d, {
-        fill:"none",
+        fill: "none",
         stroke: highlight ? (COLORS.nodeArcHi || "#f3722c") : (COLORS.nodeArc || "#f8961e"),
-        "stroke-width": 0.6,                 // ≈ half of pointer lines
+        "stroke-width": 0.6,                 // thinner than pointer lines
         "stroke-linecap": "round",
         "stroke-opacity": highlight ? 0.65 : 0.35
       }));
     };
-    mk(nodeLon - ARC_DEG, nodeLon);     // left
-    mk(nodeLon,           nodeLon + ARC_DEG); // right
+    mk(nodeLon - arcDeg, nodeLon);           // left side
+    mk(nodeLon,           nodeLon + arcDeg); // right side
   }
 
   // update(t, sunLonGeo, nodeAsc?, nodeDesc?)
-  function update(t, sunLon, nodeAsc, nodeDesc){
+    function update(t, sunLon, nodeAsc, nodeDesc){
     arcsG.replaceChildren();
     pinsG.replaceChildren();
 
-    const asc = (nodeAsc != null) ? nodeAsc : meanNodeLon(new Date(t));
-    const desc = (nodeDesc != null) ? nodeDesc : (asc + 180) % 360;
+    // robust time handling
+    const d = (t instanceof Date) ? t : new Date(t);
+    if (isNaN(d)) return;
 
-    ctx.state.nodeAscLon = asc;
+    // prefer true nodes if provided; else mean node
+    const asc0  = (nodeAsc  != null) ? nodeAsc  : meanNodeLon(d);
+    const desc0 = (nodeDesc != null) ? nodeDesc : (asc0 + 180);
+
+    // normalize to [0,360)
+    const asc  = ((asc0  % 360) + 360) % 360;
+    const desc = ((desc0 % 360) + 360) % 360;
+    const s    = ((sunLon % 360) + 360) % 360;
+
+    ctx.state.nodeAscLon  = asc;
     ctx.state.nodeDescLon = desc;
 
-    // arcs with corridor highlight
-    const ascHi  = Math.abs(angDiff(sunLon, asc))  <= ECLIPSE_CORRIDOR_DEG;
-    const descHi = Math.abs(angDiff(sunLon, desc)) <= ECLIPSE_CORRIDOR_DEG;
-    drawNodeArcsPair(asc, ascHi);
+    // highlight if Sun is within corridor
+    const ascHi  = Math.abs(angDiff(s, asc))  <= ECLIPSE_CORRIDOR_DEG;
+    const descHi = Math.abs(angDiff(s, desc)) <= ECLIPSE_CORRIDOR_DEG;
+
+    drawNodeArcsPair(asc,  ascHi);
     drawNodeArcsPair(desc, descHi);
 
     // pins
