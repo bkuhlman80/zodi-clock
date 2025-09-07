@@ -84,7 +84,8 @@ export function initNodes(ctx){
 
   // two short arcs of fixed arc length ≈63 at r=200, hugging the node symbol, sun-centered    
   function drawNodeArcsPair(nodeLon, highlight){
-    const r = RADIUS.nodes;                 // 200
+    const ARC_INSET = 8;                    // pull arcs inward toward the Sun
+    const r = RADIUS.nodes - ARC_INSET;     // 192 when nodes=200
     const arcLen = 63;
     const arcDeg = arcLen * 360 / (2 * Math.PI * r);   // ≈18°
     const style = {
