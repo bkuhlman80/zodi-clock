@@ -8,7 +8,8 @@ import { initNodes } from "./nodes.js";
 import { initBodies } from "./bodies.js";
 import { solarLonDeg } from "./engine.js";
 
-const State = { mode: "frozen", t: new Date(), speed: 60 };
+// with speed=255k, ~2.95 days/sec → year ≈123.7 s, synodic month ≈10 s
+const State = { mode: "frozen", t: new Date(), speed: 255000 };
 const setMode = m => State.mode = (m === "animated" ? "animated" : "frozen");
 const setTime = d => State.t = new Date(d);
 const advance = ms => State.t = new Date(State.t.getTime() + State.speed * ms);

@@ -2,13 +2,12 @@
 import { COLORS, RADIUS, FONT_SYM, SIGNS } from "./constants.js";
 import { group, circle, line, text, polar } from "./svg.js";
 import { toSceneDeg, norm360 } from "./math.js";
-import { solarLonDeg, fastMoonLon } from "./engine.js";
+import { fastSunLon, fastMoonLon } from "./engine.js";
 
 function fmtZodiac(lon){
+  if (!Number.isFinite(lon)) return null;
   const L = norm360(lon);
-  const signIdx = Math.floor(L/30);
-  const deg = Math.floor(L % 30);
-  return { sign: SIGNS[signIdx], deg };
+  return { sign: SIGNS[Math.floor(L/30)], deg: Math.floor(L % 30) };
 }
 
 export function initBodies(ctx){
@@ -21,37 +20,41 @@ export function initBodies(ctx){
   const objs  = L.bodies.objs ??= group({ class:"objs" });
   if (!root.parentNode){ ctx.svg.append(root); root.append(rays, objs); }
 
-  // glyphs (created once, updated in place)
-  const sunDot  = circle(0, 0, 6, { fill: COLORS.sun || "#f7c948" });
-  const sunRay  = line(0,0,0,0, { stroke: COLORS.sun || "#f7c948", "stroke-width": 2 });
-  const moonRay = line(0,0,0,0, { stroke: "#fff", "stroke-width": 1.5, opacity: .9 });
-  const moonDot = circle(0,0,4, { fill: COLORS.moon || "#9ec5ff" });
+  // dots
+  const earthDot = circle(0,0,3.5,{ fill: COLORS.earth || "#3b82f6" });
+  const sunDot   = circle(0,0,5,  { fill: COLORS.sun   || "#f5b301" });
+  const moonDot  = circle(0,0,4,  { fill: COLORS.moon  || "#9aa3af" });
 
+  // rays (Earth->Sun/Moon->outer ring)
+  const sunRay  = line(0,0,0,0,{ stroke: COLORS.sun || "#f5b301", "stroke-width":2 });
+  const moonRay = line(0,0,0,0,{ stroke: "#fff", "stroke-width":1.5, opacity:.9 });
+
+  objs.append(earthDot, sunDot, moonDot);
   rays.append(sunRay, moonRay);
-  objs.append(sunDot, moonDot);
 
   function update(t){
-    // longitudes (geocentric, ecliptic)
-    const sLon = solarLonDeg(t);
+    const sLon = fastSunLon(t);
     const mLon = fastMoonLon(t);
+    if (!Number.isFinite(sLon) || !Number.isFinite(mLon)) return; // avoid NaN spam
 
-    // rays to outer ring
-    const [sx, sy] = polar(0,0,RADIUS.outer, toSceneDeg(sLon));
-    const [mx, my] = polar(0,0,RADIUS.outer, toSceneDeg(mLon));
-    sunRay.setAttribute("x2", sx); sunRay.setAttribute("y2", sy);
-    moonRay.setAttribute("x2", mx); moonRay.setAttribute("y2", my);
+    // Sun dot on Earth ring
+    const [sx, sy] = polar(0,0,RADIUS.earth, toSceneDeg(sLon));
+    sunDot.setAttribute("cx", sx); sunDot.setAttribute("cy", sy);
 
-    // moon position on its inner orbit ring
-    const [mx2, my2] = polar(0,0,RADIUS.moon, toSceneDeg(mLon));
-    moonDot.setAttribute("cx", mx2); moonDot.setAttribute("cy", my2);
+    // Moon dot on Moon ring
+    const [mx, my] = polar(0,0,RADIUS.earth + RADIUS.moon, toSceneDeg(mLon));
+    moonDot.setAttribute("cx", mx); moonDot.setAttribute("cy", my);
 
-    // readout (if host provided spans)
-    const rSun  = ctx.readoutSun, rMoon = ctx.readoutMoon;
-    if (rSun || rMoon){
-      const S = fmtZodiac(sLon), M = fmtZodiac(mLon);
-      if (rSun)  rSun.textContent  = `Sun: ${S.deg}° ${S.sign}`;
-      if (rMoon) rMoon.textContent = `Moon: ${M.deg}° ${M.sign}`;
-    }
+    // Rays to outer ring
+    const [srx, sry] = polar(0,0,RADIUS.outer, toSceneDeg(sLon));
+    sunRay.setAttribute("x2", srx); sunRay.setAttribute("y2", sry);
+    const [mrx, mry] = polar(0,0,RADIUS.outer, toSceneDeg(mLon));
+    moonRay.setAttribute("x2", mrx); moonRay.setAttribute("y2", mry);
+
+    // readout
+    const S = fmtZodiac(sLon), M = fmtZodiac(mLon);
+    if (ctx.readoutSun && S)  ctx.readoutSun.textContent  = `Sun: ${S.deg}° ${S.sign}`;
+    if (ctx.readoutMoon && M) ctx.readoutMoon.textContent = `Moon: ${M.deg}° ${M.sign}`;
   }
 
   return { update };
