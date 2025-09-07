@@ -71,38 +71,38 @@ export function initNodes(ctx){
   }
 
 
-// short clockwise arc helper: startScene → startScene+arcDeg (always <180°)
-    function smallArcPath(cx, cy, r, startScene, arcDeg){
+// short arc from startScene by signed arcDeg (CW if >0, CCW if <0)
+  function smallArcPathSigned(cx, cy, r, startScene, arcDeg){
     const s = startScene;
-    const e = s + arcDeg;                  // guarantees short arc
-    const a = (deg)=> (deg - 90) * Math.PI/180;
+    const e = s + arcDeg;
+    const a = d => (d - 90) * Math.PI/180;
     const x1 = cx + r * Math.cos(a(s)), y1 = cy + r * Math.sin(a(s));
     const x2 = cx + r * Math.cos(a(e)), y2 = cy + r * Math.sin(a(e));
-    const large = 0, sweep = 0;            // clockwise, short
+    const large = 0;
+    const sweep = arcDeg >= 0 ? 0 : 1;   // flip direction without using long arc
     return `M ${x1} ${y1} A ${r} ${r} 0 ${large} ${sweep} ${x2} ${y2}`;
     }
 
+
   // two short arcs of fixed arc length ≈63 at r=200, hugging the node symbol, sun-centered    
   function drawNodeArcsPair(nodeLon, highlight){
-    const ARC_INSET = 8;                    // pull arcs inward toward the Sun
-    const r = RADIUS.nodes - ARC_INSET;     // 192 when nodes=200
+    const rArc = RADIUS.nodes - 8;        // keep your current inset value
     const arcLen = 63;
-    const arcDeg = arcLen * 360 / (2 * Math.PI * r);   // ≈18°
+    const arcDeg = arcLen * 360 / (2 * Math.PI * rArc);
+
     const style = {
-      fill:"none",
-      stroke: highlight ? (COLORS.nodeArcHi || "#f3722c")
-                        : (COLORS.nodeArc   || "#f8961e"),
-      "stroke-width": 0.6,
-      "stroke-linecap": "round",
-      "stroke-opacity": highlight ? 0.65 : 0.35
+        fill:"none",
+        stroke: highlight ? (COLORS.nodeArcHi || "#f3722c") : (COLORS.nodeArc || "#f8961e"),
+        "stroke-width": 0.6,
+        "stroke-linecap": "round",
+        "stroke-opacity": highlight ? 0.65 : 0.35
     };
-    // Compute around the pin in SCENE space so arcs straddle it
-    const A = toSceneDeg(nodeLon);
-    const sLeft  = A - arcDeg;   // arc ends at the pin
-    const sRight = A;            // arc starts at the pin
-    arcsG.appendChild(path(smallArcPath(0,0,r, sLeft,  arcDeg), style)); // left (below)
-    arcsG.appendChild(path(smallArcPath(0,0,r, sRight, arcDeg), style)); // right (above)
-  }
+
+    const A = toSceneDeg(nodeLon);        // scene angle of the pin
+    // one arc each side of the node, same start A, opposite directions
+    arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A, +arcDeg), style)); // CW
+    arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A, -arcDeg), style)); // CCW
+    }
 
   // update(t, sunLonGeo, nodeAsc?, nodeDesc?)
     function update(t, sunLon, nodeAsc, nodeDesc){
