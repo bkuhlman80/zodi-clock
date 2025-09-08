@@ -84,21 +84,20 @@ export function initNodes(ctx){
 
        // Full arc with gap at pin (concave, CW) 
     function drawNodeArcsPair(nodeLon, highlight){
-        const rArc   = RADIUS.nodes - 8;                                // keep your inset
-        const arcLen = 63;
-        const total  = arcLen * 360 / (2 * Math.PI * rArc);             // ≈18°
-        const half   = total / 2;
-        const gapPx  = 2;
-        const gapDeg = gapPx * 360 / (2 * Math.PI * rArc);              // tiny gap at pin
-        const style = { fill:"none",
-        stroke: highlight ? (COLORS.nodeArcHi || "#f3722c") : (COLORS.nodeArc || "#f8961e"),
-        "stroke-width": 0.6, "stroke-linecap":"round", "stroke-opacity": highlight ? 0.65 : 0.35 };
-        const A = toSceneDeg(nodeLon);
-        // Left arc: CCW from just before the pin
-        arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A - gapDeg, -half), style));
-        // Right arc: CW from just after the pin
-        arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A + gapDeg, +half), style));
-        }
+      const rArc    = RADIUS.nodes - 8;
+      const total   = 2*ECLIPSE_CORRIDOR_DEG;                    // target corridor span in degrees
+      const half    = total / 2;             // 18° each side
+      const gapPx   = 2;
+      const gapDeg  = gapPx * 360 / (2 * Math.PI * rArc); // keep tiny visual gap
+      const style = { fill:"none",
+      stroke: highlight ? (COLORS.nodeArcHi || "#f3722c") : (COLORS.nodeArc || "#f8961e"),
+      "stroke-width": 0.6, "stroke-linecap":"round", "stroke-opacity": highlight ? 0.65 : 0.35 };
+      const A = toSceneDeg(nodeLon);
+      // Left arc: CCW from just before the pin
+      arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A - gapDeg, -half), style));
+      // Right arc: CW from just after the pin
+      arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A + gapDeg, +half), style));
+      }
 
 
   // update(t, sunLonGeo, nodeAsc?, nodeDesc?)
