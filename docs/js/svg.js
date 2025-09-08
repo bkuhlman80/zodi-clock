@@ -53,3 +53,7 @@ export function glyph(svgRoot, x, y, ch, size = 16, color = "#e6e7eb", font = FO
   svgRoot.appendChild(t);
   return t;
 }
+
+export function rect(x, y, w, h, attrs = {}) {
+  return svgEl("rect", { x, y, width: w, height: h, ...attrs });
+}
