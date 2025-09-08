@@ -1,5 +1,6 @@
 // docs/js/component.js
 import { ensureSvg, makeCtx } from "./ctx.js";
+import { RADIUS, VIEWBOX_PAD } from "./constants.js";
 import { loadEphemeris, getEphemFor } from "./ephemeris.js";
 import { drawWheel } from "./wheel.js";
 import { drawSeasons, updateSeasons } from "./seasons.js";
@@ -49,6 +50,12 @@ export class ZodiClock extends HTMLElement {
 
     // SVG + ctx
     const svg = ensureSvg(this._host);
+    // give the SVG extra room around the wheel
+    svg.style.overflow = "visible";
+    const baseR = (RADIUS.season ?? (RADIUS.zodiac + 18));
+    const vb = Math.ceil(baseR + VIEWBOX_PAD);
+    svg.setAttribute("viewBox", `${-vb} ${-vb} ${vb*2} ${vb*2}`);
+    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
     this._ctx = makeCtx(svg);
     this._ctx.layers ||= {};
 
