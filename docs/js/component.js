@@ -63,6 +63,7 @@ export class ZodiClock extends HTMLElement {
     this._raf = 0; this._last = 0;
     this._ctx = null; this._ephLoaded = false;
     this._dateInd = null;
+    this._controlsMounted = false;   // guard
   }
 
   async connectedCallback(){
@@ -97,9 +98,6 @@ export class ZodiClock extends HTMLElement {
     const dtAttr   = this.getAttribute("initial-dt");
     if (modeAttr) setMode(modeAttr);
     if (dtAttr)   setTime(dtAttr);
-
-    // Optional internal controls
-    if (!this.hasAttribute("no-controls")) this._mountControls();
 
     // Initial draw so dots/rays aren't at (0,0)
     if (this._ctx.layers.bodiesAPI) this._ctx.layers.bodiesAPI.update(State.t);
@@ -138,6 +136,8 @@ export class ZodiClock extends HTMLElement {
   }
 
   _mountControls(){
+    if (this._controlsMounted) return;      // prevent duplicates
+    this._controlsMounted = true;
     const bar = document.createElement("div");
     bar.className = "bar";
     bar.innerHTML = `
@@ -157,8 +157,14 @@ export class ZodiClock extends HTMLElement {
 
     const dt = bar.querySelector("#c-dt");
     dt.value = toLocalInputValue(State.t);
-    bar.querySelector("#c-anim").onclick = ()=> setMode("animated");
-    bar.querySelector("#c-froz").onclick = ()=> setMode("frozen");
+    bar.querySelector("#c-anim").onclick = ()=> { setMode("animated"); };
+    bar.querySelector("#c-froz").onclick = ()=> {
+      // restore old behavior: jump to "now" and freeze
+      const now = new Date();
+      setTime(now.toISOString());
+      setMode("frozen");
+      dt.value = toLocalInputValue(State.t);
+    };
     
     dt.addEventListener("change", e=>{
       const v = e.target.value;
