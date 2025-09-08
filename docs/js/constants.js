@@ -33,3 +33,6 @@ export const SIGN_NAMES = [
 ];
 
 export const GLYPH = { nodeAsc: "☊", nodeDesc: "☋" };
+
+// extra canvas around the wheel so seasons fit
+export const VIEWBOX_PAD = 96; // tune 64–140
