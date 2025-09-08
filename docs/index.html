@@ -23,7 +23,14 @@
     body { margin:0; background:var(--bg); color:var(--text);
            font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; }
     .wrap { max-width:1080px; margin:0 auto; padding:24px; }
-    h1 { font-size:24px; margin:0 0 12px; }
+    .title{
+      font: 800 48px/1.1 Menlo, Consolas, "Source Code Pro", "Roboto Mono", ui-monospace, monospace;
+      letter-spacing: .01em;
+      font-variant-numeric: slashed-zero;
+      font-feature-settings: "zero" 1;
+      margin: 0 0 12px;
+    }
+
     .panel { background:var(--panel); border:1px solid #1c1f26; border-radius:16px; padding:12px; }
     .notice { color:var(--muted); font-size:12px; margin-top:8px; }
     a { color:#8ab4ff; }
@@ -31,8 +38,7 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>Z0DI Clock</h1>
-    <h1 style="font-size:1.5em;line-height:1.1">Z0DI Clock</h1>
+    <h1 class="title">Z0DI Clock</h1>
     <div class="panel">
       <zodi-clock style="display:block;width:100%;max-width:960px;"
                   initial-mode="animated"></zodi-clock>
