@@ -77,7 +77,8 @@ export function initNodes(ctx){
     const a = d => (d - 90) * Math.PI/180;
     const x1 = cx + r*Math.cos(a(s)), y1 = cy + r*Math.sin(a(s));
     const x2 = cx + r*Math.cos(a(e)), y2 = cy + r*Math.sin(a(e));
-    const large = 0, sweep = arcDeg >= 0 ? 0 : 1;   // flip without long arc
+    const large = 0;
+    const sweep = arcDeg >= 0 ? 1 : 0;              // flip direction (short arc)
     return `M ${x1} ${y1} A ${r} ${r} 0 ${large} ${sweep} ${x2} ${y2}`;
     }
 
