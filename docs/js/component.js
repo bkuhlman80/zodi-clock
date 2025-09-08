@@ -52,12 +52,36 @@ export class ZodiClock extends HTMLElement {
     style.textContent = `
       .bar{display:flex;flex-direction:column;gap:6px;margin:8px 0}
       .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-      .row.controls button{font:600 21px system-ui;padding:15px 21px;border-radius:12px;border:1px solid #444;background:#1a1f29;color:#e6e7eb}
+
+      /* Buttons: lighter, -10% font size (21px -> 19px) */
+      .row.controls button{
+        font:600 19px system-ui;
+        padding:14px 20px;
+        border-radius:12px;
+        border:1px solid #5a6575;
+        background:#2a2f39;
+        color:#e6e7eb;
+      }
+      .row.controls button:hover{filter:brightness(1.08)}
+
       .row.controls label{display:flex;gap:8px;align-items:center}
-      .row.controls input[type="datetime-local"]{font:500 21px system-ui;padding:12px 15px;border-radius:12px;border:1px solid #444;min-width:420px;background:#0f1218;color:#e6e7eb}
+
+      /* Date selector matches button size */
+      .row.controls input[type="datetime-local"]{
+        font:500 19px system-ui;
+        padding:12px 15px;
+        border-radius:12px;
+        border:1px solid #5a6575;
+        min-width:420px;
+        background:#0f1218;color:#e6e7eb;
+      }
+
       .row.controls .utc{font-size:14px;opacity:.8}
-      .row.indicators .badge{font:600 15px system-ui;opacity:.95}
+
+      /* Indicators match button/input size */
+      .row.indicators .badge{font:600 19px system-ui;opacity:.95}
     `;
+
     this.shadowRoot.appendChild(style);
 
     this._raf = 0; this._last = 0;
