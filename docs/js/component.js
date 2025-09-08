@@ -79,6 +79,9 @@ export class ZodiClock extends HTMLElement {
     this._ctx = makeCtx(svg);
     this._ctx.layers ||= {};
 
+    // Controls first so readouts exist before layer init
+    if (!this.hasAttribute("no-controls")) this._mountControls();
+
     // Static layers
     drawWheel(this._ctx);
     drawSeasons(this._ctx);
@@ -121,7 +124,9 @@ export class ZodiClock extends HTMLElement {
       const key = State.t.toISOString().slice(0,10);
       this._ctx.ephem = getEphemFor(key) || this._ctx.ephem;
     }
+
     updateSeasons(this._ctx, State.t);
+    if (this._ctx.layers.bodiesAPI) this._ctx.layers.bodiesAPI.update(State.t); // <-- animate Earth/Moon
     if (this._dateInd) this._dateInd.textContent = fmtDateUTC(State.t);
 
     // Nodes: prefer ephemeris true nodes; fallback to mean node inside nodes.js
@@ -134,18 +139,6 @@ export class ZodiClock extends HTMLElement {
 
   _mountControls(){
     const bar = document.createElement("div");
-    bar.style.cssText = "display:flex;gap:8px;align-items:center;margin:8px 0";
-    bar.innerHTML = `
-      <button id="c-anim">Animated</button>
-      <button id="c-froz">Frozen</button>
-      <label style="display:flex;gap:6px;align-items:center">
-        <span style="font-size:12px;opacity:.8">UTC</span>
-        <input id="c-dt" type="datetime-local" step="1" />
-      </label>
-      <span id="r-sun"  style="font:600 12px system-ui;opacity:.9"></span>
-      <span id="r-moon" style="font:600 12px system-ui;opacity:.9;margin-left:8px"></span>
-    `;
-
     bar.className = "bar";
     bar.innerHTML = `
       <div class="row controls">
