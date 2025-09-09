@@ -1,25 +1,28 @@
 # Z0DI Clock
 
-The **Z0DI Clock** is an interactive web animation that visualizes the relationship between the Sun, Earth, and Moon within the tropical zodiac. It’s designed to be both visually compelling and phase-accurate for key lunar events.
+Interactive Sun–Earth–Moon visual in the **tropical** zodiac. Geocentric display with phase-accurate Sun–Moon geometry around key lunar events.
 
-## How to Embed Z0DI Clock
-
-Interactive Sun–Earth–Moon visual in the tropical zodiac. Geocentric display. Phase-accurate Sun–Moon geometry around key lunar events.
-
-## Live 
+## Live
 - App: https://bkuhlman80.github.io/zodi-clock/
 - Embed view: https://bkuhlman80.github.io/zodi-clock/embed.html
+
+## How to Embed
+
+### Quick iframe
+```html
+<iframe
+  src="https://bkuhlman80.github.io/zodi-clock/embed.html?mode=frozen&dt=2025-08-19T03:11:00Z&controls=0&labels=1"
+  title="Z0DI Clock"
+  width="100%"
+  height="540"
+  style="border:0;border-radius:12px;overflow:hidden"
+  loading="lazy">
+</iframe>
+```
 
 ## Web Component
 
 `<zodi-clock>` is a custom element exported by `docs/js/component.js`.
-
-**Advantages**
-- **Embed anywhere:** No iframe needed. Works in static HTML, CMS pages, React/Vue apps.
-- **Config via attributes:** Set mode, datetime, labels without touching internals.
-- **Multiple instances:** Independent clocks on one page.
-- **Scoped styles:** Shadow DOM prevents CSS collisions.
-- **Host control:** Size with CSS, position with your layout.
 
 **Include once**
 ```html
@@ -29,16 +32,6 @@ Interactive Sun–Earth–Moon visual in the tropical zodiac. Geocentric display
 <zodi-clock initial-mode="animated" labels="1" controls="1" style="display:block;max-width:960px"></zodi-clock>
 ```
 
-**Styling**
-- Outer box: style the `<zodi-clock>` element (width, max-width, aspect-ratio).
-- Internals are scoped; use attributes (`controls`, `labels`, `initial-*`) to change behavior.
-
-**URL params (for `embed.html`)**
-- `mode`: `animated` | `frozen`
-- `dt`: ISO-8601 UTC datetime, e.g. `2025-08-19T03:11:00Z` (optional)
-- `controls`: `1` show | `0` hide
-- `labels`: `1` show | `0` hide
-
 **Element attributes**
 - `initial-mode="animated|frozen"`
 - `initial-dt="YYYY-MM-DDTHH:MM:SSZ"` (UTC)
@@ -47,7 +40,16 @@ Interactive Sun–Earth–Moon visual in the tropical zodiac. Geocentric display
 - `embed="1"` (used by hosted embed; optional)
 - `no-controls` (boolean; hide internal header)
 
-## Controls behavior 
+**URL params (for `embed.html`)**
+- `mode`: `animated` | `frozen`
+- `dt`: ISO-8601 UTC datetime, e.g. `2025-08-19T03:11:00Z` (optional)
+- `controls`: `1` show | `0` hide
+- `labels`: `1` show | `0` hide
+
+**Styling**
+- Style the `<zodi-clock>` element (e.g., width, max-width, aspect-ratio). Internals are scoped.
+
+**Controls behavior**
 - Animated → header datetime input is blank; scene advances.
 - Frozen → jumps to now (UTC) and freezes; input shows exact UTC.
 - Changing the input sets the scene to that exact UTC datetime.
