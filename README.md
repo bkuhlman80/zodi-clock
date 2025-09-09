@@ -10,7 +10,7 @@ Interactive Sun–Earth–Moon visual in the tropical zodiac. Geocentric display
 - App: https://bkuhlman80.github.io/zodi-clock/
 - Embed view: https://bkuhlman80.github.io/zodi-clock/embed.html
 
-## Why a Web Component
+## Web Component
 
 `<zodi-clock>` is a custom element exported by `docs/js/component.js`.
 
@@ -26,38 +26,20 @@ Interactive Sun–Earth–Moon visual in the tropical zodiac. Geocentric display
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <script defer src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js"></script>
 <script type="module" src="https://bkuhlman80.github.io/zodi-clock/js/component.js"></script>
-<zodi-clock initial-mode="animated" labels="1" style="display:block;max-width:960px"></zodi-clock>
-```
-
-**Runtime control (no iframe messaging)**
-```js
-const clock = document.querySelector('zodi-clock');
-// jump to a specific UTC moment and freeze
-clock.setAttribute('initial-dt', '2025-08-19T03:11:00Z');
-clock.setAttribute('initial-mode', 'frozen');
-// resume animation
-clock.setAttribute('initial-mode', 'animated');
+<zodi-clock initial-mode="animated" labels="1" controls="1" style="display:block;max-width:960px"></zodi-clock>
 ```
 
 **Styling**
 - Outer box: style the `<zodi-clock>` element (width, max-width, aspect-ratio).
 - Internals are scoped; use attributes (`controls`, `labels`, `initial-*`) to change behavior.
 
-## URL params (for `embed.html`)
+**URL params (for `embed.html`)**
 - `mode`: `animated` | `frozen`
 - `dt`: ISO-8601 UTC datetime, e.g. `2025-08-19T03:11:00Z` (optional)
 - `controls`: `1` show | `0` hide
 - `labels`: `1` show | `0` hide
 
-## Direct embed (custom element)
-```html
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
-<script defer src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js"></script>
-<script type="module" src="https://bkuhlman80.github.io/zodi-clock/js/component.js"></script>
-<zodi-clock initial-mode="animated"></zodi-clock>
-```
-
-## Element attributes
+**Element attributes**
 - `initial-mode="animated|frozen"`
 - `initial-dt="YYYY-MM-DDTHH:MM:SSZ"` (UTC)
 - `controls="0|1"` (internal header UI)
@@ -111,7 +93,7 @@ git push origin main
 ```
 
 ## Troubleshooting
-- Old code showing → hard refresh or bump the ?v= query.
-- Nothing renders → ensure astronomy-engine and component.js load (module type).
-- Header duplicated → guard _mountControls() so it runs once.
-- Seasons clipped → component.js sets a padded viewBox and svg.style.overflow = "visible". Adjust padding if needed.
+- Old code showing → hard refresh or bump the `?v=` query.
+- Nothing renders → ensure `astronomy-engine` and `component.js` load (module type).
+- Header duplicated → guard `_mountControls()` so it runs once.
+- Seasons clipped → `component.js` sets a padded `viewBox` and `svg.style.overflow = "visible"`. Adjust padding if needed.
