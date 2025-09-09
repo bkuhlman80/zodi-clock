@@ -6,7 +6,7 @@ import { drawWheel } from "./wheel.js";
 import { drawSeasons, updateSeasons } from "./seasons.js";
 import { initNodes } from "./nodes.js";
 import { initBodies } from "./bodies.js";
-import { earthHelioLon } from "./engine.js";
+import { earthHelioLon, fastMoonLon } from "./engine.js";
 import { drawSabbats } from "./sabbats.js";
 
 const MMM = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -126,10 +126,18 @@ export class ZodiClock extends HTMLElement {
 
     if (this._ctx.layers.nodesAPI){
       const e = this._ctx.ephem || {};
-      const sunLonGeo = (earthHelioLon(State.t) + 180) % 360;
-      const moonGeo = mLon;                // Moon geocentric
-      nodes.update(t, sunGeo, moonGeo, nodeAsc, nodeDesc);
-      this._ctx.layers.nodesAPI.update(State.t, sunLonGeo, e.node_true_asc, e.node_true_desc);
+      const sunLonGeo  = (earthHelioLon(State.t) + 180) % 360;   // geocentric Sun
+      // prefer ephemeris if present, else fast calculator
+      const moonLonGeo = (
+        e.moon_lon_geo ?? e.moon_true_lon ?? e.moon_lon ?? e.moon
+      ) ?? fastMoonLon(State.t);
+      this._ctx.layers.nodesAPI.update(
+        State.t,
+        sunLonGeo,
+        moonLonGeo,
+        e.node_true_asc,
+        e.node_true_desc
+      );
     }
   }
 
