@@ -34,15 +34,16 @@ export function drawSeasons(ctx){
     const [x2,y2] = polar(0,0,RADIUS.zodiac + tickLen, a);
     ticks.appendChild(line(x1,y1,x2,y2,{ stroke: COLORS.seasonTick || COLORS.ring, "stroke-width": 2 }));
 
-    // label and glyph side-by-side
+    // label 
     const [lx,ly] = polar(0,0,RADIUS.season, a);    
-    const g = group();
-    // text first so we can measure bbox
-    const t = text(lx, ly, s.key, { "font-size": FS, fill: COLORS.text, "text-anchor":"end" });
-    const sym = text(lx + 16, ly, s.glyph, { "font-size": FS, fill: COLORS.text });
+    const g = group();  
+    const t = text(lx, ly, s.key, {
+      "font-size": FS,
+      fill: COLORS.text,
+      "text-anchor":"middle",
+      "dominant-baseline":"middle"
+    });
     g.appendChild(t);
-    g.appendChild(sym);
-    labs.appendChild(g);
     // pill background behind both pieces
     const bb = g.getBBox(); // bbox in current SVG coords
     const bg = svgEl("rect", {
