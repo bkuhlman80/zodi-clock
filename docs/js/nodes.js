@@ -136,8 +136,8 @@ export function initNodes(ctx){
     const [dx, dy] = polar(0, 0, RADIUS.nodes, toSceneDeg(desc));
 
     const color = COLORS.nodePin || COLORS.text;
-    pinsG.appendChild(useEclipse(ctx.svg, ax, ay, 24, color));
-    pinsG.appendChild(useEclipse(ctx.svg, dx, dy, 24, color));
+    pinsG.appendChild(useEclipse(ctx.svg, ax, ay, 15, color));
+    pinsG.appendChild(useEclipse(ctx.svg, dx, dy, 15, color));
 
     // keep any active micro-label on top
     if (ctx.state.nodeLabel) labelG.appendChild(ctx.state.nodeLabel);
