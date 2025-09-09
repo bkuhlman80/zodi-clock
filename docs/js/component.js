@@ -61,15 +61,6 @@ export class ZodiClock extends HTMLElement {
       .readout{display:inline-flex;align-items:center;gap:6px}
       .readout .sign{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:6px;background:#5a6575;color:#fff;font-weight:700;font-size:16px;line-height:1}
       .readout .lbl{opacity:.9}
-      .input-wrap{position:relative;display:inline-block}
-      .input-wrap input{color:transparent;caret-color:transparent}
-      .input-wrap input::-webkit-datetime-edit{color:transparent}
-      @supports (forced-colors: active){
-        .input-wrap input{color:CanvasText;caret-color:CanvasText}
-      }
-      .input-wrap #c-dt-display{
-        position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none
-      }
     `;
     this.shadowRoot.appendChild(style);
 
@@ -163,7 +154,7 @@ export class ZodiClock extends HTMLElement {
     }
   }
 
-    _mountControls(){
+  _mountControls(){
     if (this._controlsMounted) return;
     this._controlsMounted = true;
 
@@ -173,11 +164,7 @@ export class ZodiClock extends HTMLElement {
       <div class="row controls">
         <button id="c-anim">Animated</button>
         <button id="c-froz">Frozen</button>
-        <span class="utc">UTC</span>
-        <div class="input-wrap">
-          <input id="c-dt" type="datetime-local" step="3600" />
-          <span id="c-dt-display" aria-hidden="true"></span>
-        </div>
+        <label><span class="utc">UTC</span><input id="c-dt" type="datetime-local" step="1" /></label>
       </div>
       <div class="row indicators">
         <span id="date-ind" class="badge"></span>
@@ -195,9 +182,7 @@ export class ZodiClock extends HTMLElement {
         </span>
       </div>
     `;
-
     this._host.prepend(bar);
-    this._syncDateOverlay(); 
 
     const dt = bar.querySelector("#c-dt");
     dt.value = toLocalInputValue(State.t);
@@ -238,37 +223,6 @@ export class ZodiClock extends HTMLElement {
     }
     return null;
   }
-  
-  static MMM = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  _fmtDDMMMYYYYH(d){
-    const z = n=>String(n).padStart(2,"0");
-    return `${z(d.getUTCDate())}-${this.constructor.MMM[d.getUTCMonth()]}-${d.getUTCFullYear()} ${z(d.getUTCHours())}h`;
-  }
-  _syncDateOverlay(){
-    const root = this.shadowRoot;
-    const input = root.getElementById("c-dt");
-    const disp  = root.getElementById("c-dt-display");
-    if (!input || !disp) return;
-
-    // set initial value from frozen date or now
-    const start = this._frozenDate || new Date();
-    const p=n=>String(n).padStart(2,"0");
-    input.value = `${start.getFullYear()}-${p(start.getMonth()+1)}-${p(start.getDate())}T${p(start.getHours())}:00`;
-    disp.textContent = this._fmtDDMMMYYYYH(start);
-
-    const sync = () => {
-      const [Y,M,D,h=0,m=0] = input.value.split(/[T:-]/).map(Number);
-      const local = new Date(Y, M-1, D, h, m);
-      disp.textContent = this._fmtDDMMMYYYYH(local);
-      const iso = new Date(local.getTime() - local.getTimezoneOffset()*60000).toISOString();
-      if (typeof this.setFrozenISO === "function") this.setFrozenISO(iso);
-      else this.setAttribute("initial-dt", iso);
-    };
-    input.addEventListener("input",  sync);
-    input.addEventListener("change", sync);
-  }
 }
 
-if (!customElements.get("zodi-clock")) {
-  customElements.define("zodi-clock", ZodiClock);
-}
+customElements.define("zodi-clock", ZodiClock);

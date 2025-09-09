@@ -1,32 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Z0DI Clock — Embed</title>
+  <!-- Description -->
+  <meta name="description" content="Animated wheel of the year + tropical zodiac clock + eclipse tracker.">
 
-  <!-- OG/Twitter -->
+  <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Z0DI Clock — Embed">
   <meta property="og:description" content="Animated wheel of the year + tropical zodiac clock + eclipse tracker.">
   <meta property="og:url" content="https://bkuhlman80.github.io/zodi-clock/embed.html">
   <meta property="og:image" content="https://bkuhlman80.github.io/zodi-clock/preview.png?v=4">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Z0DI Clock — Embed">
   <meta name="twitter:description" content="Animated wheel of the year + tropical zodiac clock + eclipse tracker.">
   <meta name="twitter:image" content="https://bkuhlman80.github.io/zodi-clock/preview.png?v=4">
 
-  <!-- Icons and CSS -->
-  <link rel="icon" href="/zodi-clock/favicon.ico" type="image/x-icon">
-  <link rel="apple-touch-icon" href="/zodi-clock/apple-touch-icon.png">
-  <link rel="stylesheet" href="/zodi-clock/style.css?v=1">
+  <!-- Favicon (absolute URLs for scrapers) -->
+  <link rel="icon" href="https://bkuhlman80.github.io/zodi-clock/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="https://bkuhlman80.github.io/zodi-clock/apple-touch-icon.png">
+  <link rel="stylesheet" href="./style.css?v=1">
 
-  <!-- Scripts -->
+  <title>Z0DI Clock — Embed</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <script defer src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js"></script>
-  <script type="module" src="/zodi-clock/js/component.js?v=20250907-6"></script>
-
+  <script type="module" src="./js/component.js?v=20250907-5"></script>
   <style>
     html,body{margin:0;background:#0f1218;color:#e6e7eb;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
     .controls{display:flex;gap:.5rem;align-items:center;margin:12px 0}
@@ -42,26 +45,26 @@
   <div id="controls" class="controls">
     <button id="btn-anim">Animated</button>
     <button id="btn-frozen">Frozen</button>
-
-    <div class="input-wrap">
-      <input id="dt-input" type="datetime-local" step="3600" aria-describedby="dt-display">
-      <span id="dt-display" aria-live="polite" aria-hidden="true"></span>
-    </div>
+    <input id="dt-input" type="datetime-local" step="1">
   </div>
 
   <zodi-clock style="display:block;width:100%;max-width:2000px;"></zodi-clock>
 
   <script>
     const p = new URLSearchParams(location.search);
+    const initialMode = p.get("mode") || "frozen";
+    const dtParam     = p.get("dt");
+    const controls    = p.get("controls") ?? "0";
+    const labels      = p.get("labels")   ?? "1";
+
     customElements.whenDefined("zodi-clock").then(() => {
       const el = document.querySelector("zodi-clock");
-      el.setAttribute("embed","1");
-      el.setAttribute("controls", p.get("controls") ?? "0");
-      el.setAttribute("labels",   p.get("labels")   ?? "1");
-      el.setAttribute("initial-mode", p.get("mode") || "frozen");
-      if (p.get("dt")) el.setAttribute("initial-dt", p.get("dt"));
+      el.setAttribute("embed", "1");
+      el.setAttribute("controls", controls);
+      el.setAttribute("labels", labels);
+      el.setAttribute("initial-mode", initialMode);
+      if (dtParam) el.setAttribute("initial-dt", dtParam);
     });
   </script>
 </body>
-
 </html>
