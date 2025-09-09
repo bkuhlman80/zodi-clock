@@ -58,7 +58,7 @@ export function initNodes(ctx){
 
       if (ctx.state.nodeLabel) ctx.state.nodeLabel.remove();
       const t = text(lx, ly - 16, `${hit === "asc" ? "☊" : "☋"} ${deg}°${sign}`, {
-        "font-size": 12,
+        "font-size": 2,
         fill: COLORS.text,
         "paint-order": "stroke",
         stroke: "#000",
