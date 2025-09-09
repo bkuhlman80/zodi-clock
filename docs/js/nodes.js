@@ -132,8 +132,6 @@ export function initNodes(ctx){
   function update(t, sunLon, moonLon, nodeAsc, nodeDesc){
     arcsG.replaceChildren();
     pinsG.replaceChildren();
-    // also nuke any stray legacy icons not under pinsG
-    ctx.svg.querySelectorAll(".eclipse-node").forEach(n => n.remove());
 
     const d = (t instanceof Date) ? t : new Date(t);
     if (isNaN(d)) return;
