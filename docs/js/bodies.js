@@ -84,13 +84,21 @@ export function initBodies(ctx){
       moonRay.setAttribute("x2", hit[0]); moonRay.setAttribute("y2", hit[1]);
     }
 
-    // Readouts (geocentric zodiac)
-    if (ctx.readoutSun){
-      const S = fmtZodiac((eLon + 180) % 360);      // Sun geocentric
+    const S = fmtZodiac((eLon + 180) % 360);      // Sun geocentric
+    const M = fmtZodiac(mLon);
+
+    if (ctx.readoutSunBadge && ctx.readoutSunDeg){
+      ctx.readoutSunBadge.textContent = S.sign;   // ♎
+      ctx.readoutSunDeg.textContent   = S.deg;    // 18
+    } else if (ctx.readoutSun){
+      // fallback if only old span exists
       ctx.readoutSun.textContent = `Sun: ${S.deg}° ${S.sign}`;
     }
-    if (ctx.readoutMoon){
-      const M = fmtZodiac(mLon);
+
+    if (ctx.readoutMoonBadge && ctx.readoutMoonDeg){
+      ctx.readoutMoonBadge.textContent = M.sign;  // ♊
+      ctx.readoutMoonDeg.textContent   = M.deg;   // 17
+    } else if (ctx.readoutMoon){
       ctx.readoutMoon.textContent = `Moon: ${M.deg}° ${M.sign}`;
     }
   }
