@@ -6,8 +6,8 @@ The **Z0DI Clock** is an interactive web animation that visualizes the relations
 
 Interactive Sun–Earth–Moon visual in the tropical zodiac. Geocentric display. Phase-accurate Sun–Moon geometry around key lunar events.
 
-Live App: https://bkuhlman80.github.io/zodi-clock/
-
+## Live 
+App: https://bkuhlman80.github.io/zodi-clock/
 Embed view: https://bkuhlman80.github.io/zodi-clock/embed.html
 
 ## Why a Web Component
@@ -40,14 +40,14 @@ clock.setAttribute('initial-mode', 'animated');
 ```
 
 ## Styling
-- Outer box: style the <zodi-clock> element (width, max-width, aspect-ratio).
-- Internals are scoped; use attributes (controls, labels, initial-*) to change behavior.
+- Outer box: style the `<zodi-clock>` element (width, max-width, aspect-ratio).
+- Internals are scoped; use attributes (`controls`, `labels`, `initial-*`) to change behavior.
 
-## URL params (for embed.html)
-- mode: animated | frozen
-- dt: ISO-8601 UTC datetime, e.g. 2025-08-19T03:11:00Z (optional)
-- controls: 1 show | 0 hide
-- labels: 1 show | 0 hide
+## URL params (for `embed.html`)
+- `mode`: `animated` | `frozen`
+- `dt`: ISO-8601 UTC datetime, e.g. `2025-08-19T03:11:00Z` (optional)
+- `controls`: `1` show | `0` hide
+- `labels`: `1` show | `0` hide
 
 ## Direct embed (custom element)
 ```html
@@ -58,12 +58,12 @@ clock.setAttribute('initial-mode', 'animated');
 ```
 
 ## Element attributes
-- initial-mode="animated|frozen"
-- initial-dt="YYYY-MM-DDTHH:MM:SSZ" (UTC)
-- controls="0|1" (internal header UI)
-- labels="0|1" (month/season labels)
-- embed="1" (used by hosted embed; optional)
-- no-controls (boolean; hide internal header)
+- `initial-mode="animated|frozen"`
+- `initial-dt="YYYY-MM-DDTHH:MM:SSZ"` (UTC)
+- `controls="0|1"` (internal header UI)
+- `labels="0|1"` (month/season labels)
+- `embed="1"` (used by hosted embed; optional)
+- `no-controls` (boolean; hide internal header)
 
 ## Controls behavior 
 - Animated → header datetime input is blank; scene advances.
@@ -71,7 +71,7 @@ clock.setAttribute('initial-mode', 'animated');
 - Changing the input sets the scene to that exact UTC datetime.
 
 ## Repo layout
-All runtime assets live in /docs (served by GitHub Pages).
+All runtime assets live in `/docs` (served by GitHub Pages).
 ```bash
 docs/
   index.html          # app
@@ -91,12 +91,12 @@ docs/
 
 ## Develop
 
-- Serve docs/ locally and edit files in place.
+Serve docs/ locally and edit files in place.
 ```bash
 - python3 -m http.server -d docs 5173
 # open http://localhost:5173
 ```
-- Cache-bust during iteration by bumping the query on the module line in HTML:
+Cache-bust during iteration by bumping the query on the module line in HTML:
 ```html
 <script type="module" src="./js/component.js?v=2025-09-08-1"></script>
 ```
