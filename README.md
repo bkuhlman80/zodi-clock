@@ -26,10 +26,8 @@ Embed view: https://bkuhlman80.github.io/zodi-clock/embed.html
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <script defer src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js"></script>
 <script type="module" src="https://bkuhlman80.github.io/zodi-clock/js/component.js"></script>
-```
-
-## html
 <zodi-clock initial-mode="animated" labels="1" style="display:block;max-width:960px"></zodi-clock>
+```
 
 ## Runtime control (no iframe messaging)
 const clock = document.querySelector('zodi-clock');
