@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Z0DI Clock</title>
 
-  <input id="dt-input" type="datetime-local" step="3600">
-
-  <link rel="stylesheet" href=".https://bkuhlman80.github.io/zodi-clock/style.css?v=1">
-  <link rel="icon" href="https://bkuhlman80.github.io/zodi-clock/favicon.ico" type="image/x-icon">
-  <link rel="apple-touch-icon" href="https://bkuhlman80.github.io/zodi-clock/apple-touch-icon.png">
+  <link rel="stylesheet" href="/zodi-clock/style.css?v=1">
+  <link rel="icon" href="/zodi-clock/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="/zodi-clock/apple-touch-icon.png">
 
   <meta property="og:title" content="Z0DI Clock" />
   <meta property="og:description" content="Animated wheel of the year + tropical zodiac clock + eclipse tracker." />
@@ -19,27 +18,29 @@
   <meta name="twitter:card" content="summary_large_image" />
 
   <script defer src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js"></script>
-  <script type="module" src="https://bkuhlman80.github.io/zodi-clock/js/component.js?v=20250907-6"></script>
-  <script type="module" src="js/date-overlay.js"></script>
-
-  <style>
-    :root { --bg:#0b0c10; --panel:#111318; --text:#e6e7eb; --muted:#9aa0aa; }
-    body { margin:0; background:var(--bg); color:var(--text);
-           font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; }
-    .wrap { max-width:1080px; margin:0 auto; padding:24px; }
-    .title{
-      font: 800 48px/1.1 Menlo, Consolas, "Source Code Pro", "Roboto Mono", ui-monospace, monospace;
-      letter-spacing: .01em;
-      font-variant-numeric: slashed-zero;
-      font-feature-settings: "zero" 1;
-      margin: 0 0 12px;
-    }
-
-    .panel { background:var(--panel); border:1px solid #1c1f26; border-radius:16px; padding:12px; }
-    .notice { color:var(--muted); font-size:12px; margin-top:8px; }
-    a { color:#8ab4ff; }
-  </style>
+  <script type="module" src="/zodi-clock/js/component.js?v=20250907-6"></script>
+  <script type="module" src="/zodi-clock/js/date-overlay.js"></script> 
 </head>
+
+
+<style>
+  :root { --bg:#0b0c10; --panel:#111318; --text:#e6e7eb; --muted:#9aa0aa; }
+  body { margin:0; background:var(--bg); color:var(--text);
+          font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; }
+  .wrap { max-width:1080px; margin:0 auto; padding:24px; }
+  .title{
+    font: 800 48px/1.1 Menlo, Consolas, "Source Code Pro", "Roboto Mono", ui-monospace, monospace;
+    letter-spacing: .01em;
+    font-variant-numeric: slashed-zero;
+    font-feature-settings: "zero" 1;
+    margin: 0 0 12px;
+  }
+
+  .panel { background:var(--panel); border:1px solid #1c1f26; border-radius:16px; padding:12px; }
+  .notice { color:var(--muted); font-size:12px; margin-top:8px; }
+  a { color:#8ab4ff; }
+</style>
+
 <body>
   <div class="wrap">
     <h1 class="title">Z0DI Clock</h1>
