@@ -140,7 +140,7 @@ export function initNodes(ctx){
     // pick one: "double-outline", "solid-overlap", or "hatched"
     const color   = COLORS.nodePin || COLORS.text;
     const variant = "double-outline";      // or "solid-overlap" | "hatched"
-    const DIAM    = 12; // scene units; try 8–12
+    const DIAM    = 15; // scene units; try 8–12
     const a  = useEclipseBox(ctx.svg, ax, ay, DIAM, color, variant);
     const d2 = useEclipseBox(ctx.svg, dx, dy, DIAM, color, variant);
     a.classList.add("eclipse-node"); d2.classList.add("eclipse-node");
