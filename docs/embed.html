@@ -24,12 +24,12 @@
   <!-- Favicon (absolute URLs for scrapers) -->
   <link rel="icon" href="https://bkuhlman80.github.io/zodi-clock/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="https://bkuhlman80.github.io/zodi-clock/apple-touch-icon.png">
-  <link rel="stylesheet" href="./css/style.css?v=1">
+  <link rel="stylesheet" href="./css/style.css?v=2">
 
   <title>Z0DI Clock — Embed</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <script defer src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js"></script>
-  <script type="module" src="./js/component.js?v=20250907-5"></script>
+  <script type="module" src="./js/component.js?v=20250907-6"></script>
 </head>
 <body>
   <div id="controls" class="controls">
@@ -38,7 +38,7 @@
     <input id="dt-input" type="datetime-local" step="1">
   </div>
 
-  <zodi-clock style="display:block;width:100%;max-width:2000px;"></zodi-clock>
+  <zodi-clock class="zodi-container zodi-container--wide"></zodi-clock>
 
   <script>
     const p = new URLSearchParams(location.search);
