@@ -11,38 +11,61 @@ export function ensureDefs(svg){
   return defs;
 }
 
-// Register an “eclipse” symbol: outer ring + overlapping disk
-export function registerEclipse(defs){
-  if (defs.querySelector("#eclipseGlyph")) return;
+/** Register an eclipse glyph variant.
+ *  variant: "double-outline" | "solid-overlap" | "hatched"
+ */
+export function registerEclipse(defs, variant="double-outline"){
+  const id = `eclipseGlyph-${variant}`;
+  if (defs.querySelector(`#${id}`)) return id;
+
+  // optional hatch pattern for "hatched"
+  if (variant === "hatched" && !defs.querySelector("#eclipseHatch")){
+    const pat = document.createElementNS(NS,"pattern");
+    pat.setAttribute("id","eclipseHatch");
+    pat.setAttribute("patternUnits","userSpaceOnUse");
+    pat.setAttribute("width","8"); pat.setAttribute("height","8");
+    const line = document.createElementNS(NS,"path");
+    line.setAttribute("d","M0 2 H8 M0 6 H8");
+    line.setAttribute("stroke","currentColor"); line.setAttribute("stroke-width","1");
+    pat.appendChild(line);
+    defs.appendChild(pat);
+  }
+
   const sym = document.createElementNS(NS, "symbol");
-  sym.setAttribute("id", "eclipseGlyph");
+  sym.setAttribute("id", id);
   sym.setAttribute("viewBox", "0 0 100 100");
 
-  // Outer ring
-  const ring = document.createElementNS(NS, "circle");
-  ring.setAttribute("cx", "50"); ring.setAttribute("cy", "50"); ring.setAttribute("r", "42");
-  ring.setAttribute("fill", "none");
-  ring.setAttribute("stroke", "currentColor");
-  ring.setAttribute("stroke-width", "12");
-  sym.appendChild(ring);
+  const mk = (tag, attrs) => {
+    const el = document.createElementNS(NS, tag);
+    for (const [k,v] of Object.entries(attrs)) el.setAttribute(k, v);
+    return el;
+  };
 
-  // Overlapping disk (the “occulter”)
-  const disk = document.createElementNS(NS, "circle");
-  disk.setAttribute("cx", "66"); disk.setAttribute("cy", "50"); disk.setAttribute("r", "32");
-  disk.setAttribute("fill", "currentColor");
-  sym.appendChild(disk);
+  if (variant === "double-outline"){
+    // Two overlapping outlined circles (clean, no “eyeball” fill)
+    sym.appendChild(mk("circle", {cx:50, cy:50, r:42, fill:"none", stroke:"currentColor", "stroke-width":10}));
+    sym.appendChild(mk("circle", {cx:66, cy:50, r:32, fill:"none", stroke:"currentColor", "stroke-width":10}));
+  } else if (variant === "solid-overlap"){
+    // Ring + solid occluder (your first mock)
+    sym.appendChild(mk("circle", {cx:50, cy:50, r:42, fill:"none", stroke:"currentColor", "stroke-width":12}));
+    sym.appendChild(mk("circle", {cx:66, cy:50, r:32, fill:"currentColor"}));
+  } else { // "hatched"
+    sym.appendChild(mk("circle", {cx:50, cy:50, r:42, fill:"none", stroke:"currentColor", "stroke-width":10}));
+    sym.appendChild(mk("circle", {cx:66, cy:50, r:32, fill:"url(#eclipseHatch)", stroke:"currentColor", "stroke-width":10}));
+  }
 
   defs.appendChild(sym);
+  return id;
 }
 
-export function useEclipse(svg, x, y, pxSize, color){
+/** Place the glyph at scene coords (x,y) with pixel size. */
+export function useEclipse(svg, x, y, pxSize, color, variant="double-outline"){
+  const defs = ensureDefs(svg);
+  const id = registerEclipse(defs, variant);
   const use = document.createElementNS(NS, "use");
-  use.setAttributeNS(XLINK, "href", "#eclipseGlyph");
-  const s = pxSize / 100; // glyph viewBox = 100
+  use.setAttributeNS(XLINK, "href", `#${id}`);
+  const s = pxSize / 100;                       // glyph viewBox 100
   use.setAttribute("transform", `translate(${x} ${y}) scale(${s}) translate(-50 -50)`);
-  if (color) {
-    use.setAttribute("fill", color);
-    use.setAttribute("stroke", color);
-  }
+  if (color){ use.setAttribute("stroke", color); use.setAttribute("fill", color); }
   return use;
 }
