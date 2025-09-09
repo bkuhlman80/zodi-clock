@@ -30,12 +30,14 @@ Embed view: https://bkuhlman80.github.io/zodi-clock/embed.html
 ```
 
 ## Runtime control (no iframe messaging)
+```js
 const clock = document.querySelector('zodi-clock');
 // jump to a specific UTC moment and freeze
 clock.setAttribute('initial-dt', '2025-08-19T03:11:00Z');
 clock.setAttribute('initial-mode', 'frozen');
 // resume animation
 clock.setAttribute('initial-mode', 'animated');
+```
 
 ## Styling
 - Outer box: style the <zodi-clock> element (width, max-width, aspect-ratio).
@@ -48,10 +50,12 @@ clock.setAttribute('initial-mode', 'animated');
 - labels: 1 show | 0 hide
 
 ## Direct embed (custom element)
+```html
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <script defer src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js"></script>
 <script type="module" src="https://bkuhlman80.github.io/zodi-clock/js/component.js"></script>
 <zodi-clock initial-mode="animated"></zodi-clock>
+```
 
 ## Element attributes
 - initial-mode="animated|frozen"
@@ -68,7 +72,7 @@ clock.setAttribute('initial-mode', 'animated');
 
 ## Repo layout
 All runtime assets live in /docs (served by GitHub Pages).
-
+```bash
 docs/
   index.html          # app
   embed.html          # iframe host
@@ -83,22 +87,28 @@ docs/
     ctx.js, svg.js    # drawing helpers
   favicon.svg / .png
   preview.png
+```
 
 ## Develop
 
 - Serve docs/ locally and edit files in place.
+```bash
 - python3 -m http.server -d docs 5173
 # open http://localhost:5173
+```
 - Cache-bust during iteration by bumping the query on the module line in HTML:
+```html
 <script type="module" src="./js/component.js?v=2025-09-08-1"></script>
+```
 
 ## Deploy
 
 GitHub Pages serves from main → /docs. Push to deploy.
-
+```bash
 git add -A
 git commit -m "update"
 git push origin main
+```
 
 ## Troubleshooting
 - Old code showing → hard refresh or bump the ?v= query.
