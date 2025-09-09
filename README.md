@@ -7,8 +7,8 @@ The **Z0DI Clock** is an interactive web animation that visualizes the relations
 Interactive Sun–Earth–Moon visual in the tropical zodiac. Geocentric display. Phase-accurate Sun–Moon geometry around key lunar events.
 
 ## Live 
-App: https://bkuhlman80.github.io/zodi-clock/
-Embed view: https://bkuhlman80.github.io/zodi-clock/embed.html
+- App: https://bkuhlman80.github.io/zodi-clock/
+- Embed view: https://bkuhlman80.github.io/zodi-clock/embed.html
 
 ## Why a Web Component
 
@@ -29,7 +29,7 @@ Embed view: https://bkuhlman80.github.io/zodi-clock/embed.html
 <zodi-clock initial-mode="animated" labels="1" style="display:block;max-width:960px"></zodi-clock>
 ```
 
-## Runtime control (no iframe messaging)
+**Runtime control (no iframe messaging)**
 ```js
 const clock = document.querySelector('zodi-clock');
 // jump to a specific UTC moment and freeze
@@ -39,7 +39,7 @@ clock.setAttribute('initial-mode', 'frozen');
 clock.setAttribute('initial-mode', 'animated');
 ```
 
-## Styling
+**Styling**
 - Outer box: style the `<zodi-clock>` element (width, max-width, aspect-ratio).
 - Internals are scoped; use attributes (`controls`, `labels`, `initial-*`) to change behavior.
 
