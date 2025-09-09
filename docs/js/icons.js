@@ -43,21 +43,33 @@ export function registerEclipse(defs, variant="double-outline"){
 
   if (variant === "double-outline"){
     // Two overlapping outlined circles (clean, no “eyeball” fill)
-    sym.appendChild(mk("circle", {cx:50, cy:50, r:42, fill:"none", stroke:"currentColor", "stroke-width":10}));
-    sym.appendChild(mk("circle", {cx:66, cy:50, r:32, fill:"none", stroke:"currentColor", "stroke-width":10}));
+        // double-outline
+    sym.appendChild(mk("circle",{cx:50,cy:50,r:42,fill:"none",stroke:"currentColor","stroke-width":8}));
+    sym.appendChild(mk("circle",{cx:66,cy:50,r:32,fill:"none",stroke:"currentColor","stroke-width":8}));
   } else if (variant === "solid-overlap"){
-    // Ring + solid occluder (your first mock)
-    sym.appendChild(mk("circle", {cx:50, cy:50, r:42, fill:"none", stroke:"currentColor", "stroke-width":12}));
+        // Ring + solid occluder (your first mock)
+    sym.appendChild(mk("circle", {cx:50, cy:50, r:42, fill:"none", stroke:"currentColor", "stroke-width":8}));
     sym.appendChild(mk("circle", {cx:66, cy:50, r:32, fill:"currentColor"}));
-  } else { // "hatched"
-    sym.appendChild(mk("circle", {cx:50, cy:50, r:42, fill:"none", stroke:"currentColor", "stroke-width":10}));
-    sym.appendChild(mk("circle", {cx:66, cy:50, r:32, fill:"url(#eclipseHatch)", stroke:"currentColor", "stroke-width":10}));
+  } else { 
+        // "hatched"
+    sym.appendChild(mk("circle", {cx:50, cy:50, r:42, fill:"none", stroke:"currentColor", "stroke-width":8}));
+    sym.appendChild(mk("circle", {cx:66, cy:50, r:32, fill:"url(#eclipseHatch)", stroke:"currentColor", "stroke-width":8}));
   }
 
   defs.appendChild(sym);
   return id;
 }
 
+export function useEclipseScene(svg, x, y, sceneDiameter, color, variant="double-outline"){
+  const defs = ensureDefs(svg);
+  const id = registerEclipse(defs, variant);
+  const use = document.createElementNS(NS, "use");
+  use.setAttributeNS(XLINK, "href", `#${id}`);
+  const s = sceneDiameter / 100;                 // 100 = glyph viewBox
+  use.setAttribute("transform", `translate(${x} ${y}) scale(${s}) translate(-50 -50)`);
+  if (color){ use.setAttribute("stroke", color); use.setAttribute("fill", color); }
+  return use;
+}
 /** Place the glyph at scene coords (x,y) with pixel size. */
 export function useEclipse(svg, x, y, pxSize, color, variant="double-outline"){
   const defs = ensureDefs(svg);

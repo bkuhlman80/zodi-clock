@@ -134,14 +134,13 @@ export function initNodes(ctx){
 
     const [ax, ay] = polar(0, 0, RADIUS.nodes, toSceneDeg(asc));
     const [dx, dy] = polar(0, 0, RADIUS.nodes, toSceneDeg(desc));
-
-    const color = COLORS.nodePin || COLORS.text;
     
     // pick one: "double-outline", "solid-overlap", or "hatched"
-    const style = "double-outline";
-    pinsG.appendChild(useEclipse(ctx.svg, ax, ay, 18, color, style));
-    pinsG.appendChild(useEclipse(ctx.svg, dx, dy, 18, color, style));
-
+    const variant = "double-outline";
+    const color   = COLORS.nodePin || COLORS.text;
+    const DIAM    = 14; // scene units, not pixels
+    pinsG.appendChild(useEclipseScene(ctx.svg, ax, ay, DIAM, color, variant));
+    pinsG.appendChild(useEclipseScene(ctx.svg, dx, dy, DIAM, color, variant));
 
     // keep any active micro-label on top
     if (ctx.state.nodeLabel) labelG.appendChild(ctx.state.nodeLabel);
