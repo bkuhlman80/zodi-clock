@@ -2,7 +2,7 @@
 import { COLORS, RADIUS, ECLIPSE_CORRIDOR_DEG, FONT_SYM, SIGNS } from "./constants.js";
 import { group, text, path, polar } from "./svg.js";
 import { angDiff, toSceneDeg, norm360 } from "./math.js";
-import { ensureDefs, registerEclipse, useEclipse } from "./icons.js";
+import { ensureDefs, registerEclipse, useEclipseScene } from "./icons.js";
 
 // mean lunar node (deg) — fallback if ephemeris lacks true nodes
 function julianCenturies(d){
