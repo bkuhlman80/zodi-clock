@@ -21,6 +21,11 @@
   <meta name="twitter:description" content="Animated wheel of the year + tropical zodiac clock + eclipse tracker.">
   <meta name="twitter:image" content="https://bkuhlman80.github.io/zodi-clock/preview.png?v=4">
 
+  <div class="input-wrap">
+    <input id="dt-input" type="datetime-local" step="3600" aria-describedby="dt-display">
+    <span id="dt-display" aria-live="polite" aria-hidden="true"></span>
+  </div>
+
   <!-- Favicon (absolute URLs for scrapers) -->
   <link rel="icon" href="https://bkuhlman80.github.io/zodi-clock/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="https://bkuhlman80.github.io/zodi-clock/apple-touch-icon.png">
@@ -30,6 +35,9 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <script defer src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js"></script>
   <script type="module" src="./js/component.js?v=20250907-5"></script>
+  <script type="module" src="js/component.js"></script>
+  <script type="module" src="js/date-overlay.js"></script>
+
   <style>
     html,body{margin:0;background:#0f1218;color:#e6e7eb;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
     .controls{display:flex;gap:.5rem;align-items:center;margin:12px 0}
