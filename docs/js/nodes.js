@@ -2,6 +2,7 @@
 import { COLORS, RADIUS, ECLIPSE_CORRIDOR_DEG, FONT_SYM, SIGNS } from "./constants.js";
 import { group, text, path, polar } from "./svg.js";
 import { angDiff, toSceneDeg, norm360 } from "./math.js";
+import { ensureDefs, registerEclipse, useEclipse } from "./icons.js";
 
 // mean lunar node (deg) — fallback if ephemeris lacks true nodes
 function julianCenturies(d){
@@ -70,50 +71,50 @@ export function initNodes(ctx){
     L.nodes.boundPointer = true;
   }
 
-
-    // short arc from startScene by signed arcDeg (CW if >0, CCW if <0)
-    function smallArcPathSigned(cx, cy, r, startScene, arcDeg){
+  // short arc from startScene by signed arcDeg (CW if >0, CCW if <0)
+  function smallArcPathSigned(cx, cy, r, startScene, arcDeg){
     const s = startScene, e = s + arcDeg;
     const a = d => (d - 90) * Math.PI/180;
     const x1 = cx + r*Math.cos(a(s)), y1 = cy + r*Math.sin(a(s));
     const x2 = cx + r*Math.cos(a(e)), y2 = cy + r*Math.sin(a(e));
     const large = 0;
-    const sweep = arcDeg >= 0 ? 1 : 0;              // flip direction (short arc)
+    const sweep = arcDeg >= 0 ? 1 : 0; // short arc direction
     return `M ${x1} ${y1} A ${r} ${r} 0 ${large} ${sweep} ${x2} ${y2}`;
-    }
+  }
 
-       // Full arc with gap at pin (concave, CW) 
-    function drawNodeArcsPair(nodeLon, highlight){
-      const rArc    = RADIUS.nodes - 8;
-      const total   = 2*ECLIPSE_CORRIDOR_DEG;                    // target corridor span in degrees
-      const half    = total / 2;             // 18° each side
-      const gapPx   = 2;
-      const gapDeg  = gapPx * 360 / (2 * Math.PI * rArc); // keep tiny visual gap
-      const style = { fill:"none",
+  // pair of concave corridor arcs around a node
+  function drawNodeArcsPair(nodeLon, highlight){
+    const rArc    = RADIUS.nodes - 8;
+    const total   = 2*ECLIPSE_CORRIDOR_DEG;
+    const half    = total / 2;
+    const gapPx   = 2;
+    const gapDeg  = gapPx * 360 / (2 * Math.PI * rArc); // tiny visual gap
+    const style = {
+      fill: "none",
       stroke: highlight ? (COLORS.nodeArcHi || "#f3722c") : (COLORS.nodeArc || "#f8961e"),
-      "stroke-width": 0.6, "stroke-linecap":"round", "stroke-opacity": highlight ? 0.65 : 0.35 };
-      const A = toSceneDeg(nodeLon);
-      // Left arc: CCW from just before the pin
-      arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A - gapDeg, -half), style));
-      // Right arc: CW from just after the pin
-      arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A + gapDeg, +half), style));
-      }
-
+      "stroke-width": 0.6,
+      "stroke-linecap": "round",
+      "stroke-opacity": highlight ? 0.65 : 0.35
+    };
+    const A = toSceneDeg(nodeLon);
+    // CCW left of pin
+    arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A - gapDeg, -half), style));
+    // CW right of pin
+    arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A + gapDeg, +half), style));
+  }
 
   // update(t, sunLonGeo, nodeAsc?, nodeDesc?)
-    function update(t, sunLon, nodeAsc, nodeDesc){
+  function update(t, sunLon, nodeAsc, nodeDesc){
     arcsG.replaceChildren();
     pinsG.replaceChildren();
 
-    // robust time handling
     const d = (t instanceof Date) ? t : new Date(t);
     if (isNaN(d)) return;
 
-    // prefer true nodes if provided; else mean node
+    // true nodes preferred; else mean node
     const asc0  = (nodeAsc  != null) ? nodeAsc  : meanNodeLon(d);
     const desc0 = (nodeDesc != null) ? nodeDesc : (asc0 + 180);
 
-    // normalize to [0,360)
     const asc  = ((asc0  % 360) + 360) % 360;
     const desc = ((desc0 % 360) + 360) % 360;
     const s    = ((sunLon % 360) + 360) % 360;
@@ -121,18 +122,22 @@ export function initNodes(ctx){
     ctx.state.nodeAscLon  = asc;
     ctx.state.nodeDescLon = desc;
 
-    // highlight if Sun is within corridor
     const ascHi  = Math.abs(angDiff(s, asc))  <= ECLIPSE_CORRIDOR_DEG;
     const descHi = Math.abs(angDiff(s, desc)) <= ECLIPSE_CORRIDOR_DEG;
 
     drawNodeArcsPair(asc,  ascHi);
     drawNodeArcsPair(desc, descHi);
 
-    // pins
+    // pins → eclipse glyphs
+    const defs = ensureDefs(ctx.svg);
+    registerEclipse(defs);
+
     const [ax, ay] = polar(0, 0, RADIUS.nodes, toSceneDeg(asc));
     const [dx, dy] = polar(0, 0, RADIUS.nodes, toSceneDeg(desc));
-    pinsG.appendChild(text(ax, ay, "☊", { "font-size": 20, fill: COLORS.nodePin || COLORS.text, "font-family": FONT_SYM }));
-    pinsG.appendChild(text(dx, dy, "☋", { "font-size": 20, fill: COLORS.nodePin || COLORS.text, "font-family": FONT_SYM }));
+
+    const color = COLORS.nodePin || COLORS.text;
+    pinsG.appendChild(useEclipse(ctx.svg, ax, ay, 24, color));
+    pinsG.appendChild(useEclipse(ctx.svg, dx, dy, 24, color));
 
     // keep any active micro-label on top
     if (ctx.state.nodeLabel) labelG.appendChild(ctx.state.nodeLabel);
