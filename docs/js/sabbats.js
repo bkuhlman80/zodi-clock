@@ -31,7 +31,7 @@ export function drawSabbats(ctx){
 
   for (const s of SABBATS){
     const a = toSceneDeg(s.deg);
-    const [lx,ly] = polar(0,0,RADIUS.season, a);
+    const [lx,ly] = polar(0,0,RADIUS.earth, a);
 
     const g = group();
     const t = text(lx, ly, s.key, {
