@@ -30,7 +30,8 @@ export function drawSabbats(ctx){
   const FS = 12;
 
   for (const s of SABBATS){
-    const a = toSceneDeg(s.deg);
+    // rotate labels so Earth sits on the festival name at the actual date
+    const a = toSceneDeg((s.deg + 180) % 360);
     const [lx,ly] = polar(0,0,RADIUS.earth, a);
 
     const g = group();
