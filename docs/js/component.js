@@ -7,6 +7,7 @@ import { drawSeasons, updateSeasons } from "./seasons.js";
 import { initNodes } from "./nodes.js";
 import { initBodies } from "./bodies.js";
 import { earthHelioLon } from "./engine.js";
+import { drawSabbats } from "./sabbats.js";
 
 const MMM = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const fmtDateUTC = d => {
@@ -110,6 +111,7 @@ export class ZodiClock extends HTMLElement {
     // Static layers
     drawWheel(this._ctx);
     drawSeasons(this._ctx);
+    drawSabbats(this._ctx);
     this._ctx.layers.bodiesAPI = initBodies(this._ctx);
     this._ctx.layers.nodesAPI  = initNodes(this._ctx);
 
