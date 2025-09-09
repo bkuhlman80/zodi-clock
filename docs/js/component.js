@@ -17,9 +17,9 @@ const fmtDateUTC = d => {
 
 // ~2.95 days/sec → year ≈123.7 s, synodic month ≈10 s
 const State = { mode: "frozen", t: new Date(), speed: 255000 };
-const setMode   = m => State.mode = (m === "animated" ? "animated" : "frozen");
-const setTime   = d => State.t = new Date(d);
-const advance   = ms => State.t = new Date(State.t.getTime() + State.speed * ms);
+const setMode = m => State.mode = (m === "animated" ? "animated" : "frozen");
+const setTime = d => State.t = new Date(d);
+const advance = ms => State.t = new Date(State.t.getTime() + State.speed * ms);
 
 function toLocalInputValue(d){
   const z=new Date(d), p=n=>String(n).padStart(2,"0");
@@ -47,56 +47,33 @@ export class ZodiClock extends HTMLElement {
     host.style.cssText = "display:block;width:100%;height:100%";
     this.shadowRoot.appendChild(host);
     this._host = host;
-    
-    // controls CSS (buttons/input +50%; badges +25%)
+
     const style = document.createElement("style");
     style.textContent = `
       .bar{display:flex;flex-direction:column;gap:6px;margin:8px 0}
       .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-
-      /* Buttons: lighter, -10% font size (21px -> 19px) */
-      .row.controls button{
-        font:600 19px system-ui;
-        padding:14px 20px;
-        border-radius:12px;
-        border:1px solid #5a6575;
-        background:#2a2f39;
-        color:#e6e7eb;
-      }
+      .row.controls button{font:600 19px system-ui;padding:14px 20px;border-radius:12px;border:1px solid #5a6575;background:#2a2f39;color:#e6e7eb}
       .row.controls button:hover{filter:brightness(1.08)}
-
       .row.controls label{display:flex;gap:8px;align-items:center}
-
-      /* Date selector matches button size */
-      .row.controls input[type="datetime-local"]{
-        font:500 19px system-ui;
-        padding:12px 15px;
-        border-radius:12px;
-        border:1px solid #5a6575;
-        min-width:420px;
-        background:#0f1218;color:#e6e7eb;
-      }
-
+      .row.controls input[type="datetime-local"]{font:500 19px system-ui;padding:12px 15px;border-radius:12px;border:1px solid #5a6575;min-width:420px;background:#0f1218;color:#e6e7eb}
       .row.controls .utc{font-size:14px;opacity:.8}
-
-      /* Indicators match button/input size */
       .row.indicators .badge{font:600 19px system-ui;opacity:.95}
+      .readout{display:inline-flex;align-items:center;gap:6px}
+      .readout .sign{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:6px;background:#5a6575;color:#fff;font-weight:700;font-size:16px;line-height:1}
+      .readout .lbl{opacity:.9}
     `;
-
     this.shadowRoot.appendChild(style);
 
     this._raf = 0; this._last = 0;
     this._ctx = null; this._ephLoaded = false;
     this._dateInd = null;
-    this._controlsMounted = false;   // guard
+    this._controlsMounted = false;
   }
 
   async connectedCallback(){
     await waitForAstronomy();
 
-    // SVG + ctx
     const svg = ensureSvg(this._host);
-    // give the SVG extra room around the wheel
     svg.style.overflow = "visible";
     const baseR = (RADIUS.season ?? (RADIUS.zodiac + 18));
     const vb = Math.ceil(baseR + VIEWBOX_PAD);
@@ -105,31 +82,25 @@ export class ZodiClock extends HTMLElement {
     this._ctx = makeCtx(svg);
     this._ctx.layers ||= {};
 
-    // Controls first so readouts exist before layer init
     if (!this.hasAttribute("no-controls")) this._mountControls();
 
-    // Static layers
     drawWheel(this._ctx);
     drawSeasons(this._ctx);
     drawSabbats(this._ctx);
     this._ctx.layers.bodiesAPI = initBodies(this._ctx);
     this._ctx.layers.nodesAPI  = initNodes(this._ctx);
 
-    // Ephemeris table (for nodes)
     await loadEphemeris();
     this._ephLoaded = true;
 
-    // Hydrate attrs
     const modeAttr = this.getAttribute("initial-mode");
     const dtAttr   = this.getAttribute("initial-dt");
     if (modeAttr) setMode(modeAttr);
     if (dtAttr)   setTime(dtAttr);
 
-    // Initial draw so dots/rays aren't at (0,0)
     if (this._ctx.layers.bodiesAPI) this._ctx.layers.bodiesAPI.update(State.t);
     this._renderFrame();
 
-    // RAF loop
     const tick = (ts)=>{
       if (!this.isConnected) return;
       if (!this._last) this._last = ts;
@@ -150,20 +121,20 @@ export class ZodiClock extends HTMLElement {
     }
 
     updateSeasons(this._ctx, State.t);
-    if (this._ctx.layers.bodiesAPI) this._ctx.layers.bodiesAPI.update(State.t); // <-- animate Earth/Moon
+    if (this._ctx.layers.bodiesAPI) this._ctx.layers.bodiesAPI.update(State.t);
     if (this._dateInd) this._dateInd.textContent = fmtDateUTC(State.t);
 
-    // Nodes: prefer ephemeris true nodes; fallback to mean node inside nodes.js
     if (this._ctx.layers.nodesAPI){
       const e = this._ctx.ephem || {};
-      const sunLonGeo = (earthHelioLon(State.t) + 180) % 360; // geocentric Sun
+      const sunLonGeo = (earthHelioLon(State.t) + 180) % 360;
       this._ctx.layers.nodesAPI.update(State.t, sunLonGeo, e.node_true_asc, e.node_true_desc);
     }
   }
 
   _mountControls(){
-    if (this._controlsMounted) return;      // prevent duplicates
+    if (this._controlsMounted) return;
     this._controlsMounted = true;
+
     const bar = document.createElement("div");
     bar.className = "bar";
     bar.innerHTML = `
@@ -174,37 +145,47 @@ export class ZodiClock extends HTMLElement {
       </div>
       <div class="row indicators">
         <span id="date-ind" class="badge"></span>
-        <span id="r-sun"  class="badge"></span>
-        <span id="r-moon" class="badge"></span>
+
+        <span id="r-sun" class="readout">
+          <span class="sign" id="sun-sign"></span>
+          <span class="lbl">Sun:</span>
+          <span class="deg" id="sun-deg"></span>°
+        </span>
+
+        <span id="r-moon" class="readout">
+          <span class="sign" id="moon-sign"></span>
+          <span class="lbl">Moon:</span>
+          <span class="deg" id="moon-deg"></span>°
+        </span>
       </div>
     `;
-
     this._host.prepend(bar);
 
     const dt = bar.querySelector("#c-dt");
     dt.value = toLocalInputValue(State.t);
     bar.querySelector("#c-anim").onclick = ()=> { setMode("animated"); };
     bar.querySelector("#c-froz").onclick = ()=> {
-      // restore old behavior: jump to "now" and freeze
       const now = new Date();
       setTime(now.toISOString());
       setMode("frozen");
       dt.value = toLocalInputValue(State.t);
     };
-    
     dt.addEventListener("change", e=>{
-      const v = e.target.value;
-      if (!v) return;                      // ignore empty value
-      const d = new Date(v);
-      if (isNaN(d)) return;                // avoid “Invalid time value”
-      setTime(d.toISOString());
-      setMode("frozen");
+      const v = e.target.value; if (!v) return;
+      const d = new Date(v); if (isNaN(d)) return;
+      setTime(d.toISOString()); setMode("frozen");
     });
 
-    // give bodies.js readout spans
-    this._ctx.readoutSun  = bar.querySelector("#r-sun");
-    this._ctx.readoutMoon = bar.querySelector("#r-moon");
-    this._dateInd         = bar.querySelector("#date-ind");
+    // Back-compat: expose both whole span and parts
+    this._ctx.readoutSun        = bar.querySelector("#r-sun");
+    this._ctx.readoutSunBadge   = bar.querySelector("#sun-sign");
+    this._ctx.readoutSunDeg     = bar.querySelector("#sun-deg");
+
+    this._ctx.readoutMoon       = bar.querySelector("#r-moon");
+    this._ctx.readoutMoonBadge  = bar.querySelector("#moon-sign");
+    this._ctx.readoutMoonDeg    = bar.querySelector("#moon-deg");
+
+    this._dateInd = bar.querySelector("#date-ind");
     this._dateInd.textContent = fmtDateUTC(State.t);
   }
 }
