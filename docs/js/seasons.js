@@ -4,10 +4,10 @@ import { group, line, text, svgEl, polar } from "./svg.js";
 import { toSceneDeg } from "./math.js";
 
 const SEASONS = [
-  { key: "Mar", deg:   0, glyph: "△" },  // March equinox
-  { key: "Jun", deg:  90, glyph: "◇" },  // June solstice
-  { key: "Sep", deg: 180, glyph: "▽" },  // September equinox
-  { key: "Dec", deg: 270, glyph: "◇" },  // December solstice
+  { key: "Equinox", deg:   0, glyph: "△" },  // March equinox
+  { key: "Solstice", deg:  90, glyph: "◇" },  // June solstice
+  { key: "Equinox", deg: 180, glyph: "▽" },  // September equinox
+  { key: "Solstice", deg: 270, glyph: "◇" },  // December solstice
 ];
 
 export function drawSeasons(ctx){
