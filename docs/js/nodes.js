@@ -62,7 +62,7 @@ export function initNodes(ctx){
         fill: COLORS.text,
         "paint-order": "stroke",
         stroke: "#000",
-        "stroke-width": 2,
+        "stroke-width": 12,
         "font-family": FONT_SYM,
       });
       labelG.appendChild(t);
