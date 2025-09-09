@@ -107,6 +107,8 @@ export function initNodes(ctx){
   function update(t, sunLon, nodeAsc, nodeDesc){
     arcsG.replaceChildren();
     pinsG.replaceChildren();
+    // also nuke any stray legacy icons not under pinsG
+    ctx.svg.querySelectorAll(".eclipse-node").forEach(n => n.remove());
 
     const d = (t instanceof Date) ? t : new Date(t);
     if (isNaN(d)) return;
@@ -136,11 +138,13 @@ export function initNodes(ctx){
     const [dx, dy] = polar(0, 0, RADIUS.nodes, toSceneDeg(desc));
     
     // pick one: "double-outline", "solid-overlap", or "hatched"
-    const variant = "double-outline";
     const color   = COLORS.nodePin || COLORS.text;
-    const DIAM    = 2; // scene units, not pixels
-    pinsG.appendChild(useEclipseScene(ctx.svg, ax, ay, DIAM, color, variant));
-    pinsG.appendChild(useEclipseScene(ctx.svg, dx, dy, DIAM, color, variant));
+    const variant = "double-outline";      // or "solid-overlap" | "hatched"
+    const DIAM    = 8;                     // tiny, scene units (try 8–10)
+    const a = useEclipseScene(ctx.svg, ax, ay, DIAM, color, variant);
+    const d2 = useEclipseScene(ctx.svg, dx, dy, DIAM, color, variant);
+    a.classList.add("eclipse-node"); d2.classList.add("eclipse-node");
+    pinsG.append(a, d2);
 
     // keep any active micro-label on top
     if (ctx.state.nodeLabel) labelG.appendChild(ctx.state.nodeLabel);

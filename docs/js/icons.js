@@ -44,16 +44,16 @@ export function registerEclipse(defs, variant="double-outline"){
   if (variant === "double-outline"){
     // Two overlapping outlined circles (clean, no “eyeball” fill)
         // double-outline
-    sym.appendChild(mk("circle",{cx:50,cy:50,r:42,fill:"none",stroke:"currentColor","stroke-width":8}));
-    sym.appendChild(mk("circle",{cx:66,cy:50,r:32,fill:"none",stroke:"currentColor","stroke-width":8}));
+    sym.appendChild(mk("circle",{cx:50,cy:50,r:42,fill:"none",stroke:"currentColor","stroke-width":4}));
+    sym.appendChild(mk("circle",{cx:66,cy:50,r:32,fill:"none",stroke:"currentColor","stroke-width":4}));
   } else if (variant === "solid-overlap"){
         // Ring + solid occluder (your first mock)
-    sym.appendChild(mk("circle", {cx:50, cy:50, r:42, fill:"none", stroke:"currentColor", "stroke-width":8}));
+    sym.appendChild(mk("circle", {cx:50, cy:50, r:42, fill:"none", stroke:"currentColor", "stroke-width":4}));
     sym.appendChild(mk("circle", {cx:66, cy:50, r:32, fill:"currentColor"}));
   } else { 
         // "hatched"
-    sym.appendChild(mk("circle", {cx:50, cy:50, r:42, fill:"none", stroke:"currentColor", "stroke-width":8}));
-    sym.appendChild(mk("circle", {cx:66, cy:50, r:32, fill:"url(#eclipseHatch)", stroke:"currentColor", "stroke-width":8}));
+    sym.appendChild(mk("circle", {cx:50, cy:50, r:42, fill:"none", stroke:"currentColor", "stroke-width":4}));
+    sym.appendChild(mk("circle", {cx:66, cy:50, r:32, fill:"url(#eclipseHatch)", stroke:"currentColor", "stroke-width":4}));
   }
 
   defs.appendChild(sym);
