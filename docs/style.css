@@ -1,0 +1,2 @@
+.eclipse-node { opacity: .35; transition: opacity .15s linear; }
+.eclipse-node.active { opacity: .85; }

@@ -2,14 +2,8 @@
 // Astronomy Engine bridge + fast approximations (keeps animated/frozen parity).
 
 const DAY = 86400 * 1000;
-const YEAR_DAYS = 365.24219;
 const MOON_SYNODIC_DAYS = 29.530588853;
 const NEW_MOON_REF = new Date(Date.UTC(2000, 0, 6, 18, 14, 0)); // J2000-era true new moon
-
-function marchEquinoxApprox(y) {
-  // Simple fixed UTC approximation used only for fast Sun longitude
-  return new Date(Date.UTC(y, 2, 20, 21, 0, 0));
-}
 
 /** Precise geocentric ecliptic longitudes using Astronomy.Engine. */
 export function preciseLongitudes(date) {

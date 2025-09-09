@@ -127,6 +127,8 @@ export class ZodiClock extends HTMLElement {
     if (this._ctx.layers.nodesAPI){
       const e = this._ctx.ephem || {};
       const sunLonGeo = (earthHelioLon(State.t) + 180) % 360;
+      const moonGeo = mLon;                // Moon geocentric
+      nodes.update(t, sunGeo, moonGeo, nodeAsc, nodeDesc);
       this._ctx.layers.nodesAPI.update(State.t, sunLonGeo, e.node_true_asc, e.node_true_desc);
     }
   }

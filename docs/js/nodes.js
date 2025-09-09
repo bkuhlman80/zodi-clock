@@ -103,8 +103,8 @@ export function initNodes(ctx){
     arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A + gapDeg, +half), style));
   }
 
-  // update(t, sunLonGeo, nodeAsc?, nodeDesc?)
-  function update(t, sunLon, nodeAsc, nodeDesc){
+  // update
+  function update(t, sunLon, moonLon, nodeAsc, nodeDesc){
     arcsG.replaceChildren();
     pinsG.replaceChildren();
     // also nuke any stray legacy icons not under pinsG
@@ -119,16 +119,26 @@ export function initNodes(ctx){
 
     const asc  = ((asc0  % 360) + 360) % 360;
     const desc = ((desc0 % 360) + 360) % 360;
-    const s    = ((sunLon % 360) + 360) % 360;
+    const s    = ((sunLon  % 360) + 360) % 360;   // Sun geocentric longitude
+    const m    = ((moonLon % 360) + 360) % 360;   // Moon geocentric longitude
 
     ctx.state.nodeAscLon  = asc;
     ctx.state.nodeDescLon = desc;
 
-    const ascHi  = Math.abs(angDiff(s, asc))  <= ECLIPSE_CORRIDOR_DEG;
-    const descHi = Math.abs(angDiff(s, desc)) <= ECLIPSE_CORRIDOR_DEG;
+    // Sun must be inside *either* corridor
+    const sunNearAsc  = Math.abs(angDiff(s, asc))  <= ECLIPSE_CORRIDOR_DEG;
+    const sunNearDesc = Math.abs(angDiff(s, desc)) <= ECLIPSE_CORRIDOR_DEG;
+    const sunNearAny  = sunNearAsc || sunNearDesc;
 
-    drawNodeArcsPair(asc,  ascHi);
-    drawNodeArcsPair(desc, descHi);
+    // Moon chooses which node lights
+    const moonNearAsc  = Math.abs(angDiff(m, asc))  <= ECLIPSE_CORRIDOR_DEG;
+    const moonNearDesc = Math.abs(angDiff(m, desc)) <= ECLIPSE_CORRIDOR_DEG;
+
+    const ascActive  = sunNearAny && moonNearAsc;
+    const descActive = sunNearAny && moonNearDesc;
+
+    drawNodeArcsPair(asc,  ascActive);
+    drawNodeArcsPair(desc, descActive);
 
     // pins → eclipse glyphs
     const defs = ensureDefs(ctx.svg);
@@ -143,7 +153,8 @@ export function initNodes(ctx){
     const DIAM    = 15; // scene units; try 8–12
     const a  = useEclipseBox(ctx.svg, ax, ay, DIAM, color, variant);
     const d2 = useEclipseBox(ctx.svg, dx, dy, DIAM, color, variant);
-    a.classList.add("eclipse-node"); d2.classList.add("eclipse-node");
+    a.classList.toggle("active",  ascActive);
+    d2.classList.toggle("active", descActive);
     pinsG.append(a, d2);
 
     // keep any active micro-label on top
