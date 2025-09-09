@@ -138,7 +138,7 @@ export function initNodes(ctx){
     // pick one: "double-outline", "solid-overlap", or "hatched"
     const variant = "double-outline";
     const color   = COLORS.nodePin || COLORS.text;
-    const DIAM    = 14; // scene units, not pixels
+    const DIAM    = 2; // scene units, not pixels
     pinsG.appendChild(useEclipseScene(ctx.svg, ax, ay, DIAM, color, variant));
     pinsG.appendChild(useEclipseScene(ctx.svg, dx, dy, DIAM, color, variant));
 
