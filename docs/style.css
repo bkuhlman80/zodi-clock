@@ -1,4 +1,14 @@
 
+.input-wrap{position:relative;display:inline-block}
+.input-wrap input{color:transparent;caret-color:transparent}
+@supports (forced-colors: active){
+  .input-wrap input{color: CanvasText; caret-color: CanvasText} /* allow visibility in HC */
+}
+.input-wrap input::-webkit-datetime-edit{color:transparent}
+.input-wrap #dt-display{
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  pointer-events:none
+}
 
 .eclipse-node { opacity: .35; transition: opacity .12s linear; }
 .eclipse-node.active { opacity: .9; }

@@ -225,4 +225,6 @@ export class ZodiClock extends HTMLElement {
   }
 }
 
-customElements.define("zodi-clock", ZodiClock);
+if (!customElements.get("zodi-clock")) {
+  customElements.define("zodi-clock", ZodiClock);
+}
