@@ -26,42 +26,33 @@ Embed view: https://bkuhlman80.github.io/zodi-clock/embed.html
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <script defer src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js"></script>
 <script type="module" src="https://bkuhlman80.github.io/zodi-clock/js/component.js"></script>
-Use
+```
 
-html
-Copy code
+## html
 <zodi-clock initial-mode="animated" labels="1" style="display:block;max-width:960px"></zodi-clock>
-Runtime control (no iframe messaging)
 
-js
-Copy code
+## Runtime control (no iframe messaging)
 const clock = document.querySelector('zodi-clock');
 // jump to a specific UTC moment and freeze
 clock.setAttribute('initial-dt', '2025-08-19T03:11:00Z');
 clock.setAttribute('initial-mode', 'frozen');
 // resume animation
 clock.setAttribute('initial-mode', 'animated');
-Styling
 
-Outer box: style the <zodi-clock> element (width, max-width, aspect-ratio).
+## Styling
+- Outer box: style the <zodi-clock> element (width, max-width, aspect-ratio).
+- Internals are scoped; use attributes (controls, labels, initial-*) to change behavior.
 
-Internals are scoped; use attributes (controls, labels, initial-*) to change behavior.
+## URL params (for embed.html)
+- mode: animated | frozen
+- dt: ISO-8601 UTC datetime, e.g. 2025-08-19T03:11:00Z (optional)
+- controls: 1 show | 0 hide
+- labels: 1 show | 0 hide
 
-URL params (for embed.html)
-
-mode: animated | frozen
-
-dt: ISO-8601 UTC datetime, e.g. 2025-08-19T03:11:00Z (optional)
-
-controls: 1 show | 0 hide
-
-labels: 1 show | 0 hide
-
-Direct embed (custom element)
+## Direct embed (custom element)
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <script defer src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js"></script>
 <script type="module" src="https://bkuhlman80.github.io/zodi-clock/js/component.js"></script>
-
 <zodi-clock initial-mode="animated"></zodi-clock>
 
 ## Element attributes
