@@ -2,7 +2,7 @@
 import { COLORS, RADIUS, ECLIPSE_CORRIDOR_DEG, FONT_SYM, SIGNS } from "./constants.js";
 import { group, text, path, polar } from "./svg.js";
 import { angDiff, toSceneDeg, norm360 } from "./math.js";
-import { ensureDefs, registerEclipse, useEclipseScene } from "./icons.js";
+import { ensureDefs, registerEclipse, useEclipseBox } from "./icons.js";
 
 // mean lunar node (deg) — fallback if ephemeris lacks true nodes
 function julianCenturies(d){
@@ -58,7 +58,7 @@ export function initNodes(ctx){
 
       if (ctx.state.nodeLabel) ctx.state.nodeLabel.remove();
       const t = text(lx, ly - 16, `${hit === "asc" ? "☊" : "☋"} ${deg}°${sign}`, {
-        "font-size": 2,
+        "font-size": 12,
         fill: COLORS.text,
         "paint-order": "stroke",
         stroke: "#000",
@@ -140,9 +140,9 @@ export function initNodes(ctx){
     // pick one: "double-outline", "solid-overlap", or "hatched"
     const color   = COLORS.nodePin || COLORS.text;
     const variant = "double-outline";      // or "solid-overlap" | "hatched"
-    const DIAM    = 8;                     // tiny, scene units (try 8–10)
-    const a = useEclipseScene(ctx.svg, ax, ay, DIAM, color, variant);
-    const d2 = useEclipseScene(ctx.svg, dx, dy, DIAM, color, variant);
+    const DIAM    = 10; // scene units; try 8–12
+    const a  = useEclipseBox(ctx.svg, ax, ay, DIAM, color, variant);
+    const d2 = useEclipseBox(ctx.svg, dx, dy, DIAM, color, variant);
     a.classList.add("eclipse-node"); d2.classList.add("eclipse-node");
     pinsG.append(a, d2);
 
