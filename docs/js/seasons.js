@@ -34,30 +34,35 @@ export function drawSeasons(ctx){
     const [x2,y2] = polar(0,0,RADIUS.zodiac + tickLen, a);
     ticks.appendChild(line(x1,y1,x2,y2,{ stroke: COLORS.seasonTick || COLORS.ring, "stroke-width": 2 }));
 
-    // label 
-    const [lx,ly] = polar(0,0,RADIUS.season, a);    
-    const g = group();  
-    const t = text(lx, ly, s.key, {
-      "font-size": FS,
-      fill: COLORS.text,
-      "text-anchor":"middle",
-      "dominant-baseline":"middle"
-    });
-    g.appendChild(t);
-    // pill background behind both pieces
-    const bb = g.getBBox(); // bbox in current SVG coords
-    const bg = svgEl("rect", {
-      x: bb.x - PAD_X,
-      y: bb.y - PAD_Y,
-      width: bb.width + PAD_X*2,
-      height: bb.height + PAD_Y*2,
-      rx: RX, ry: RX,
-      fill: COLORS.badgeBG,
-      opacity: 0.16,
-      stroke: COLORS.badgeBG,
-      "stroke-opacity": 0.32
-    });
-    g.insertBefore(bg, g.firstChild);
+  // label
+  const [lx,ly] = polar(0,0,RADIUS.season, a);
+  const g = group();
+
+  const t = text(lx, ly, s.key, {
+    "font-size": FS,
+    fill: COLORS.text,
+    "text-anchor":"middle",
+    "dominant-baseline":"middle"
+  });
+  g.appendChild(t);
+
+  // append BEFORE measuring
+  labs.appendChild(g);
+
+  // pill background
+  const bb = g.getBBox();
+  const bg = svgEl("rect", {
+    x: bb.x - PAD_X,
+    y: bb.y - PAD_Y,
+    width: bb.width + PAD_X*2,
+    height: bb.height + PAD_Y*2,
+    rx: RX, ry: RX,
+    fill: COLORS.badgeBG,
+    opacity: 0.16,
+    stroke: COLORS.badgeBG,
+    "stroke-opacity": 0.32
+  });
+  g.insertBefore(bg, g.firstChild);
   }
 }
 
