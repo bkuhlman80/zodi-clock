@@ -20,6 +20,22 @@ export function initNodes(ctx){
   ctx.state  ||= {};
   const L = ctx.layers;
   L.nodes ||= {};
+    
+  // glow
+  const defs = ensureDefs(ctx.svg);
+  let glow = defs.querySelector("#node-glow");
+  if (!glow){
+    glow = document.createElementNS("http://www.w3.org/2000/svg","filter");
+    glow.setAttribute("id","node-glow");
+    glow.setAttribute("x","-50%"); glow.setAttribute("y","-50%");
+    glow.setAttribute("width","200%"); glow.setAttribute("height","200%");
+    const blur = document.createElementNS("http://www.w3.org/2000/svg","feGaussianBlur");
+    blur.setAttribute("in","SourceGraphic"); blur.setAttribute("stdDeviation","1.5");
+    const merge = document.createElementNS("http://www.w3.org/2000/svg","feMerge");
+    const m1 = document.createElementNS("http://www.w3.org/2000/svg","feMergeNode");
+    const m2 = document.createElementNS("http://www.w3.org/2000/svg","feMergeNode"); m2.setAttribute("in","SourceGraphic");
+    merge.append(m1,m2); glow.append(blur, merge); defs.append(glow);
+  }
 
   // root groups
   const root   = L.nodes.root   ??= group({ id: "nodes" });
@@ -84,24 +100,33 @@ export function initNodes(ctx){
 
   // pair of concave corridor arcs around a node
   function drawNodeArcsPair(nodeLon, highlight){
-    const rArc    = RADIUS.nodes - 8;
-    const total   = 2*ECLIPSE_CORRIDOR_DEG;
-    const half    = total / 2;
-    const gapPx   = 2;
-    const gapDeg  = gapPx * 360 / (2 * Math.PI * rArc); // tiny visual gap
+    const rArc   = RADIUS.nodes - 8;
+    const total  = 2 * ECLIPSE_CORRIDOR_DEG;
+    const half   = total / 2;
+    const gapPx  = 2;
+    const gapDeg = gapPx * 360 / (2 * Math.PI * rArc);
+
     const style = {
       fill: "none",
-      stroke: highlight ? (COLORS.nodeArcHi || "#f3722c") : (COLORS.nodeArc || "#f8961e"),
-      "stroke-width": 0.6,
+      stroke: highlight ? "#ffd166" : (COLORS.nodeArc || "#f8961e"),
       "stroke-linecap": "round",
-      "stroke-opacity": highlight ? 0.65 : 0.35
+      "stroke-width": highlight ? 1.4 : 0.5,
+      "stroke-opacity": highlight ? 0.95 : 0.22
     };
+
     const A = toSceneDeg(nodeLon);
-    // CCW left of pin
-    arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A - gapDeg, -half), style));
-    // CW right of pin
-    arcsG.appendChild(path(smallArcPathSigned(0,0,rArc, A + gapDeg, +half), style));
+
+    // CCW (left of pin) and CW (right of pin)
+    const p1 = path(smallArcPathSigned(0, 0, rArc, A - gapDeg, -half), style);
+    const p2 = path(smallArcPathSigned(0, 0, rArc, A + gapDeg,  +half), style);
+
+    if (highlight){
+      p1.setAttribute("filter","url(#node-glow)");
+      p2.setAttribute("filter","url(#node-glow)");
+    }
+    arcsG.append(p1, p2);
   }
+
 
   // update
   function update(t, sunLon, moonLon, nodeAsc, nodeDesc){
@@ -156,6 +181,9 @@ export function initNodes(ctx){
     a.classList.toggle("active",  ascActive);
     d2.classList.toggle("active", descActive);
     pinsG.append(a, d2);
+    // match glyph opacity to active state
+    a.setAttribute("opacity", ascActive ? 0.95 : 0.35);   // or ascHi if you kept the old booleans
+    d2.setAttribute("opacity", descActive ? 0.95 : 0.35);
 
     // keep any active micro-label on top
     if (ctx.state.nodeLabel) labelG.appendChild(ctx.state.nodeLabel);
