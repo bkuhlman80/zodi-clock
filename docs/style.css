@@ -18,3 +18,13 @@ html,body{height:100%;margin:0;background:var(--zodi-page-bg);color:var(--zodi-p
 .zodi-container--narrow{max-width:960px}
 .zodi-container--wide{max-width:2000px}
 .aspect-square{aspect-ratio:1/1}
+
+.wrap{max-width:1080px;margin:0 auto;padding:24px}
+.title{
+  font:800 48px/1.1 Menlo,Consolas,"Source Code Pro","Roboto Mono",ui-monospace,monospace;
+  letter-spacing:.01em;font-variant-numeric:slashed-zero;font-feature-settings:"zero" 1;
+  margin:0 0 12px;
+}
+.panel{background:#111318;border:1px solid #1c1f26;border-radius:16px;padding:12px}
+.notice{color:#9aa0aa;font-size:12px;margin-top:8px}
+a{color:#8ab4ff}
