@@ -69,7 +69,7 @@ docs/
     engine.js         # fast longitude helpers + phase
     ephemeris.js      # true-node lookups
     ctx.js, svg.js    # drawing helpers
-  favicon.svg / .png
+  favicon.png
   preview.png
 ```
 
