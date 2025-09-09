@@ -64,8 +64,11 @@ export class ZodiClock extends HTMLElement {
     `;
     this.shadowRoot.appendChild(style);
 
-    this._raf = 0; this._last = 0;
-    this._ctx = null; this._ephLoaded = false;
+    this._raf = 0; 
+    this._last = 0;
+    this._ctx = null; 
+    this._ephLoaded = false;
+    this._eclipses = [];
     this._dateInd = null;
     this._controlsMounted = false;
   }
@@ -92,6 +95,14 @@ export class ZodiClock extends HTMLElement {
 
     await loadEphemeris();
     this._ephLoaded = true;
+
+    try {
+      const r = await fetch("./ephemeris_daily.json");
+      if (r.ok) {
+        const j = await r.json();
+        this._eclipses = j.eclipses || [];
+      }
+    } catch {}
 
     const modeAttr = this.getAttribute("initial-mode");
     const dtAttr   = this.getAttribute("initial-dt");
@@ -131,12 +142,14 @@ export class ZodiClock extends HTMLElement {
       const moonLonGeo = (
         e.moon_lon_geo ?? e.moon_true_lon ?? e.moon_lon ?? e.moon
       ) ?? fastMoonLon(State.t);
+      const activeNode = this._activeEclipseNodeUTC(State.t); // "asc"|"desc"|null
       this._ctx.layers.nodesAPI.update(
         State.t,
         sunLonGeo,
         moonLonGeo,
         e.node_true_asc,
-        e.node_true_desc
+        e.node_true_desc,
+        activeNode
       );
     }
   }
@@ -197,6 +210,18 @@ export class ZodiClock extends HTMLElement {
 
     this._dateInd = bar.querySelector("#date-ind");
     this._dateInd.textContent = fmtDateUTC(State.t);
+  }
+
+  _activeEclipseNodeUTC(d){
+    if (!this._eclipses?.length) return null;
+    const dayUTC = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+    for (const ev of this._eclipses){
+      const evUTC = Date.parse(ev.date + "T00:00:00Z");
+      const w = Number(ev.window ?? 1);
+      const diffDays = Math.abs((dayUTC - evUTC) / 86400000);
+      if (diffDays <= w) return ev.node;   // "asc" or "desc"
+    }
+    return null;
   }
 }
 

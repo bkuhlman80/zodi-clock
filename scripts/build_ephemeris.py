@@ -20,6 +20,58 @@ except Exception as e:
 
 now = datetime.now(timezone.utc)
 y = now.year
+SOLAR_LAT_LIMIT = 1.6   # deg, good practical cutoff
+LUNAR_LAT_LIMIT = 1.3   # deg
+
+def angdiff(a, b):
+    """Smallest absolute angle difference in degrees."""
+    d = (a - b + 180.0) % 360.0 - 180.0
+    return abs(d)
+
+def julian_centuries(dt_utc):
+    # dt_utc: datetime (UTC, tz-aware)
+    jd = dt_utc.timestamp()/86400.0 + 2440587.5
+    return (jd - 2451545.0)/36525.0
+
+def mean_node_lon_deg(dt_utc):
+    """Ascending node Ω (deg), Meeus-style mean node, matches your JS."""
+    T = julian_centuries(dt_utc)
+    w = 125.04452 - 1934.136261*T + 0.0020708*T*T + (T*T*T)/450000.0
+    return w % 360.0
+
+def sun_lon_deg(t):
+    lon, _, _ = eph["earth"].at(t).observe(eph["sun"]).apparent().frame_latlon(ecliptic_frame)
+    return float(lon.degrees % 360.0)
+
+def moon_lat_deg(t):
+    _, lat, _ = eph["earth"].at(t).observe(eph["moon"]).apparent().frame_latlon(ecliptic_frame)
+    return float(lat.degrees)
+
+def find_eclipses(year):
+    """Return list of {date,type,node,window} for the given calendar year."""
+    t0 = ts.utc(year, 1, 1)
+    t1 = ts.utc(year+1, 1, 1)
+    times, phases = almanac.find_discrete(t0, t1, almanac.moon_phases(eph))  # 0=new,2=full
+    out = []
+    for t, ph in zip(times, phases):
+        if int(ph) not in (0, 2):
+            continue
+        dt = t.utc_datetime()
+        lat = abs(moon_lat_deg(t))
+        if (ph == 0 and lat > SOLAR_LAT_LIMIT) or (ph == 2 and lat > LUNAR_LAT_LIMIT):
+            continue  # not close enough to the ecliptic for an eclipse
+        # decide node by Sun ↔ node proximity at that instant
+        sun = sun_lon_deg(t)
+        asc = mean_node_lon_deg(dt)
+        desc = (asc + 180.0) % 360.0
+        node = "asc" if angdiff(sun, asc) <= angdiff(sun, desc) else "desc"
+        out.append({
+            "date": dt.date().isoformat(),
+            "type": "solar" if ph == 0 else "lunar",
+            "node": node,
+            "window": 1
+        })
+    return out
 
 # Seasons this year
 t0, t1 = ts.utc(y, 1, 1), ts.utc(y+1, 1, 1)
@@ -81,6 +133,7 @@ out = {
   "node_desc_lon_deg": round(desc_lon, 6),   # was 3
   "node_asc_sign": sign_glyph(asc_lon),
   "node_desc_sign": sign_glyph(desc_lon),
+  "eclipses": find_eclipses(y)               # ← add list for this year
 }
 
 OUT.write_text(json.dumps(out, separators=(",",":")) + "\n", encoding="utf-8")
