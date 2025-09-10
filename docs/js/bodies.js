@@ -3,6 +3,7 @@ import { COLORS, RADIUS, SIGNS, SIGN_NAMES } from "./constants.js";
 import { group, circle, line, polar } from "./svg.js";
 import { toSceneDeg, norm360 } from "./math.js";
 import { earthHelioLon, moonLonDeg } from "./engine.js";
+import { ensureDefs } from "./icons.js"; 
 
 function dirUnit(degScene){
   const a = (degScene - 90) * Math.PI/180;
@@ -34,6 +35,32 @@ export function initBodies(ctx){
     // insert before the wheel → rendered underneath wheel + labels + pins
     if (wheel) ctx.svg.insertBefore(constG, wheel);
     else ctx.svg.insertBefore(constG, ctx.svg.firstChild);
+  }
+
+  const defs = ensureDefs(ctx.svg);
+  if (!defs.querySelector("#constGlow")){
+    const NS = "http://www.w3.org/2000/svg";
+    const f = document.createElementNS(NS,"filter");
+    f.setAttribute("id","constGlow");
+    f.setAttribute("color-interpolation-filters","sRGB");
+
+    const inv = document.createElementNS(NS,"feComponentTransfer");
+    inv.setAttribute("result","inv");
+    const mk = (n)=>{ const x=document.createElementNS(NS,n); x.setAttribute("type","table"); x.setAttribute("tableValues","1 0"); return x; };
+    const r=mk("feFuncR"), g=mk("feFuncG"), b=mk("feFuncB");
+    const a=document.createElementNS(NS,"feFuncA"); a.setAttribute("type","table"); a.setAttribute("tableValues","0 1");
+    inv.append(r,g,b,a);
+
+    const blur = document.createElementNS(NS,"feGaussianBlur");
+    blur.setAttribute("in","inv"); blur.setAttribute("stdDeviation","2"); blur.setAttribute("result","glow");
+
+    const merge = document.createElementNS(NS,"feMerge");
+    const m1=document.createElementNS(NS,"feMergeNode"); m1.setAttribute("in","glow");
+    const m2=document.createElementNS(NS,"feMergeNode"); m2.setAttribute("in","inv");
+    merge.append(m1,m2);
+
+    f.append(inv, blur, merge);
+    defs.appendChild(f);
   }
 
   // build 12 images
@@ -125,11 +152,11 @@ export function initBodies(ctx){
     // Night ruler = Sun + 180° (i.e., Earth’s heliocentric longitude)
     const oppIdx = Math.floor((eLon % 360) / 30);
     const arr = L.constImgs || [];
-    for (let i=0;i<arr.length;i++){      
+    for (let i=0;i<arr.length;i++){
       const on = i === oppIdx;
       arr[i].classList.toggle("active", on);
-      // belt-and-suspenders in case of CSS caching
-      arr[i].style.opacity = on ? 1 : 0;
+      if (on) arr[i].setAttribute("filter","url(#constGlow)");
+      else    arr[i].removeAttribute("filter");
     }
   }
 

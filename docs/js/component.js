@@ -50,13 +50,8 @@ export class ZodiClock extends HTMLElement {
 
     const style = document.createElement("style");
     style.textContent = `
-     .constellation{ opacity:0; transition:opacity .6s ease; filter:none }
-     .constellation.active{
-       opacity:1;
-       filter: invert(1) brightness(2.4) contrast(1.2)
-               drop-shadow(0 0 4px #fff)
-               drop-shadow(0 0 10px #9cf);
-       }
+      .constellation{opacity:0;transition:opacity .6s ease}
+      .constellation.active{opacity:1}
       .bar{display:flex;flex-direction:column;gap:6px;margin:8px 0}
       .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
       .row.controls button{font:600 19px system-ui;padding:14px 20px;border-radius:12px;border:1px solid #5a6575;background:#2a2f39;color:#e6e7eb}
