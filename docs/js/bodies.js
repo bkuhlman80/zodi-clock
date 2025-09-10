@@ -155,6 +155,7 @@ export function initBodies(ctx){
     for (let i=0;i<arr.length;i++){
       const on = i === oppIdx;
       arr[i].classList.toggle("active", on);
+      arr[i].style.opacity = on ? 1 : 0;           // hard toggle for Safari/Shadow
       if (on) arr[i].setAttribute("filter","url(#constGlow)");
       else    arr[i].removeAttribute("filter");
     }
