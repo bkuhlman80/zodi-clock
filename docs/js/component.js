@@ -52,6 +52,15 @@ export class ZodiClock extends HTMLElement {
     style.textContent = `
       .constellation{opacity:0;transition:opacity .6s ease}
       .constellation.active{opacity:1}
+      .row.indicators{ display:flex; gap:10px; align-items:center; flex-wrap:nowrap; min-width:0 }
+      .readout{ display:inline-flex; align-items:center; gap:6px; white-space:nowrap; font-feature-settings:"tnum" 1 }
+      .readout .sign{ min-width:22px; height:22px; font-size:15px } /* tighter badge so text fits */
+      @media (max-width:420px){
+        .row.indicators .badge{ font-size:17px }
+        .readout{ gap:4px }
+        .readout .deg{ font-size:17px }
+        .readout .sign{ min-width:20px; height:20px; font-size:14px }
+      }
       .bar{display:flex;flex-direction:column;gap:6px;margin:8px 0}
       .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
       .row.controls button{font:600 19px system-ui;padding:14px 20px;border-radius:12px;border:1px solid #5a6575;background:#2a2f39;color:#e6e7eb}
