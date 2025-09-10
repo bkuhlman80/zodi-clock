@@ -61,6 +61,8 @@ export class ZodiClock extends HTMLElement {
       .readout{display:inline-flex;align-items:center;gap:6px}
       .readout .sign{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:6px;background:#5a6575;color:#fff;font-weight:700;font-size:16px;line-height:1}
       .readout .lbl{opacity:.9}
+      .eclipse-node{opacity:.35;transition:opacity .12s linear}
+      .eclipse-node.active{opacity:.9}
     `;
     this.shadowRoot.appendChild(style);
 

@@ -1,3 +1,4 @@
+// docs/js/ctx.js
 import { RADIUS } from "./constants.js";
 
 export function makeCtx(svg){ return { svg, layers:{}, ephem:null }; }

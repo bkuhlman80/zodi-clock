@@ -1,3 +1,5 @@
+/* docs/style.css
+
 /* Page-only styles. Do not reach into <zodi-clock> internals. */
 :root{
   --zodi-page-bg:#0f1218;
@@ -38,3 +40,15 @@ a{color:#8ab4ff}
 .zodi-container--narrow{max-width:960px}
 .zodi-container--wide{max-width:2000px}
 .aspect-square{aspect-ratio:1/1}
+
+.constellation {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  /* turn black → white, then add glow */
+  filter: invert(1) brightness(1.8) 
+          drop-shadow(0 0 3px #fff) 
+          drop-shadow(0 0 6px #9cf);
+}
+.constellation.active {
+  opacity: 1;
+}
