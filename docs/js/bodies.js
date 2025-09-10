@@ -63,6 +63,26 @@ export function initBodies(ctx){
     defs.appendChild(f);
   }
 
+  // after you build #constGlow
+  if (!defs.querySelector("#constDim")){
+    const NS="http://www.w3.org/2000/svg";
+    const f = document.createElementNS(NS,"filter");
+    f.id = "constDim";
+    f.setAttribute("color-interpolation-filters","sRGB");
+
+    // Map RGB to a constant mid-gray; keep alpha untouched
+    const ct = document.createElementNS(NS,"feComponentTransfer");
+    const mk = c => { const fn=document.createElementNS(NS,"feFunc"+c);
+                      fn.setAttribute("type","linear"); fn.setAttribute("slope","0"); fn.setAttribute("intercept","0.70"); return fn; };
+    ct.append(mk("R"), mk("G"), mk("B"));
+    const fa=document.createElementNS(NS,"feFuncA"); fa.setAttribute("type","identity");
+    ct.append(fa);
+
+    f.append(ct);
+    defs.appendChild(f);
+  }
+
+
   // build 12 images
   const DIAM = 128;                 // shrunk from 160
   const imgs = [];
@@ -149,17 +169,27 @@ export function initBodies(ctx){
       ctx.readoutMoon.textContent = `Moon: ${M.deg}° ${M.sign}`;
     }
 
-    // Night ruler = Sun + 180° (i.e., Earth’s heliocentric longitude)
+    // Night ruler index (opposite the Sun)
     const oppIdx = Math.floor((eLon % 360) / 30);
+    // Day sign index (where the Sun ray points)
+    const sunIdx = Math.floor(((eLon + 180) % 360) / 30);
+
     const arr = L.constImgs || [];
     for (let i=0;i<arr.length;i++){
-      const on = i === oppIdx;
-      arr[i].classList.toggle("active", on);
-      arr[i].style.opacity = on ? 1 : 0;           // hard toggle for Safari/Shadow
-      if (on) arr[i].setAttribute("filter","url(#constGlow)");
-      else    arr[i].removeAttribute("filter");
+      const isOpp = i === oppIdx;
+      const isSun = i === sunIdx && !isOpp;   // avoid double-styling
+
+      // opacity: bright (1), dim (~0.28), or hidden (0)
+      arr[i].style.opacity = isOpp ? 1 : isSun ? 0.28 : 0;
+
+      // filters: glow for opposite, soft gray for sun-hit
+      if (isOpp)        arr[i].setAttribute("filter","url(#constGlow)");
+      else if (isSun)   arr[i].setAttribute("filter","url(#constDim)");
+      else              arr[i].removeAttribute("filter");
+
+      // keep class for non-Safari paths
+      arr[i].classList.toggle("active", isOpp);
     }
   }
-
   return { update };
 }
