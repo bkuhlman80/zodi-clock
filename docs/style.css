@@ -41,14 +41,7 @@ a{color:#8ab4ff}
 .zodi-container--wide{max-width:2000px}
 .aspect-square{aspect-ratio:1/1}
 
-.constellation {
-  opacity: 0;
-  transition: opacity 0.8s ease;
-  /* turn black → white, then add glow */
-  filter: invert(1) brightness(1.8) 
-          drop-shadow(0 0 3px #fff) 
-          drop-shadow(0 0 6px #9cf);
-}
-.constellation.active {
-  opacity: 1;
-}
+/* docs/style.css */
+.constellation{ opacity:0; transition:opacity .8s ease; filter:none }
+.constellation.active{ opacity:1; filter: invert(1) brightness(1.8)
+  drop-shadow(0 0 3px #fff) drop-shadow(0 0 6px #9cf) }
