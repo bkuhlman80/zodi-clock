@@ -37,7 +37,7 @@ export function initBodies(ctx){
   }
 
   // build 12 images
-  const DIAM = 140;                 // shrunk from 160
+  const DIAM = 128;                 // shrunk from 160
   const imgs = [];
   if (!constG.hasChildNodes()){
     for (let i=0;i<12;i++){
@@ -50,6 +50,7 @@ export function initBodies(ctx){
       const [cx, cy] = polar(0, 0, RADIUS.signLabel, mid);
       im.setAttribute("x", cx - DIAM/2);
       im.setAttribute("y", cy - DIAM/2);
+      im.style.opacity = 0;
       constG.appendChild(im);
       imgs.push(im);
     }
@@ -121,12 +122,14 @@ export function initBodies(ctx){
       ctx.readoutMoon.textContent = `Moon: ${M.deg}° ${M.sign}`;
     }
 
-    // night ruler: Sun + 180°
-    const sunGeo = (eLon + 180) % 360;
-    const oppIdx = Math.floor(((sunGeo + 180) % 360) / 30);
+    // Night ruler = Sun + 180° (i.e., Earth’s heliocentric longitude)
+    const oppIdx = Math.floor((eLon % 360) / 30);
     const arr = L.constImgs || [];
-    for (let i=0;i<arr.length;i++){
-      arr[i].classList.toggle("active", i === oppIdx); // also toggles glow via CSS
+    for (let i=0;i<arr.length;i++){      
+      const on = i === oppIdx;
+      arr[i].classList.toggle("active", on);
+      // belt-and-suspenders in case of CSS caching
+      arr[i].style.opacity = on ? 1 : 0;
     }
   }
 
