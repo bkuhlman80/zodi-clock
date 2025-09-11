@@ -66,6 +66,7 @@ export class ZodiClock extends HTMLElement {
         overflow: hidden;
         text-overflow: ellipsis;
         display: inline-block;
+        font-size: clamp(14px, 3.5vw, 18px);
         max-width: 100%;
       }
       .bar{display:flex;flex-direction:column;gap:6px;margin:8px 0}
