@@ -61,6 +61,13 @@ export class ZodiClock extends HTMLElement {
         .readout .deg{ font-size:17px }
         .readout .sign{ min-width:20px; height:20px; font-size:14px }
       }
+      #date-ind {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+        max-width: 100%;
+      }
       .bar{display:flex;flex-direction:column;gap:6px;margin:8px 0}
       .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
       .row.controls button{font:600 19px system-ui;padding:14px 20px;border-radius:12px;border:1px solid #5a6575;background:#2a2f39;color:#e6e7eb}
@@ -68,7 +75,13 @@ export class ZodiClock extends HTMLElement {
       .row.controls label{display:flex;gap:8px;align-items:center}
       .row.controls input[type="datetime-local"]{font:500 19px system-ui;padding:12px 15px;border-radius:12px;border:1px solid #5a6575;min-width:420px;background:#0f1218;color:#e6e7eb}
       .row.controls .utc{font-size:14px;opacity:.8}
-      .row.indicators .badge{font:600 19px system-ui;opacity:.95}
+      .row.indicators {
+        display:flex;
+        align-items:center;
+        gap:10px;
+        flex-wrap:nowrap;   /* don't wrap date + readouts */
+        min-width:0;
+      }
       .readout{display:inline-flex;align-items:center;gap:6px}
       .readout .sign{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:6px;background:#5a6575;color:#fff;font-weight:700;font-size:16px;line-height:1}
       .readout .lbl{opacity:.9}
