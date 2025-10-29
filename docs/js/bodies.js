@@ -1,9 +1,11 @@
 // docs/js/bodies.js
 import { COLORS, RADIUS, SIGNS, SIGN_NAMES } from "./constants.js";
-import { group, circle, line, polar } from "./svg.js";
+import { group, circle, line, polar, svgEl } from "./svg.js";
 import { toSceneDeg, norm360 } from "./math.js";
 import { earthHelioLon, moonLonDeg } from "./engine.js";
-import { ensureDefs } from "./icons.js"; 
+import { ensureDefs, ensurePhaseDefs } from "./icons.js"; 
+
+const XLINK = "http://www.w3.org/1999/xlink";
 
 function dirUnit(degScene){
   const a = (degScene - 90) * Math.PI/180;
@@ -38,6 +40,7 @@ export function initBodies(ctx){
   }
 
   const defs = ensureDefs(ctx.svg);
+  ensurePhaseDefs(ctx.svg);
   if (!defs.querySelector("#constGlow")){
     const NS = "http://www.w3.org/2000/svg";
     const f = document.createElementNS(NS,"filter");
@@ -125,6 +128,26 @@ export function initBodies(ctx){
   objs.append(sunDot, moonOrb, earthDot, moonDot);
   rays.append(sunRay, moonRay);
 
+  const phaseGroup = L.bodies.phaseGroup ??= group({ class:"moon-phase" });
+  const phaseAlign = L.bodies.phaseAlign ??= group();
+  const phaseMirror = L.bodies.phaseMirror ??= group();
+  const phaseUse = L.bodies.phaseUse ??= svgEl("use");
+  const phaseBox = R_MOON * 2;
+
+  if (!phaseGroup.contains(phaseAlign)) phaseGroup.appendChild(phaseAlign);
+  if (!phaseAlign.contains(phaseMirror)) phaseAlign.appendChild(phaseMirror);
+  if (!phaseMirror.contains(phaseUse)) phaseMirror.appendChild(phaseUse);
+  if (!phaseGroup.parentNode) objs.appendChild(phaseGroup);
+
+  phaseUse.setAttribute("x", -R_MOON);
+  phaseUse.setAttribute("y", -R_MOON);
+  phaseUse.setAttribute("width", phaseBox);
+  phaseUse.setAttribute("height", phaseBox);
+  phaseUse.setAttribute("filter", "url(#phase-glow)");
+  phaseUse.setAttribute("href", "#phase-new");
+  phaseUse.setAttributeNS(XLINK, "href", "#phase-new");
+  phaseUse.setAttribute("pointer-events", "none");
+
   function update(t){
     const eLon = earthHelioLon(t);
     const eScene = toSceneDeg(eLon);
@@ -153,6 +176,32 @@ export function initBodies(ctx){
       moonRay.setAttribute("x1", ex); moonRay.setAttribute("y1", ey);
       moonRay.setAttribute("x2", ex + tHit*dx); moonRay.setAttribute("y2", ey + tHit*dy);
     }
+
+    const sunLon = norm360(eLon + 180);
+    const elong = norm360(mLon - sunLon);
+    const waning = elong > 180;
+    const phaseAngle = waning ? 360 - elong : elong;
+
+    let phaseId = "full";
+    if (phaseAngle < 12)       phaseId = "new";
+    else if (phaseAngle < 70)  phaseId = "crescent";
+    else if (phaseAngle < 110) phaseId = "quarter";
+    else if (phaseAngle < 170) phaseId = "gibbous";
+
+    const href = `#phase-${phaseId}`;
+    if (phaseUse.getAttribute("href") !== href){
+      phaseUse.setAttribute("href", href);
+      phaseUse.setAttributeNS(XLINK, "href", href);
+    }
+
+    if (waning) phaseMirror.setAttribute("transform", "scale(-1 1)");
+    else phaseMirror.removeAttribute("transform");
+
+    phaseGroup.setAttribute("transform", `translate(${mx} ${my})`);
+
+    const sunVec = dirUnit(toSceneDeg(sunLon));
+    const sunAngle = Math.atan2(sunVec[1], sunVec[0]) * 180/Math.PI;
+    phaseAlign.setAttribute("transform", `rotate(${sunAngle})`);
 
     const S = fmtZodiac((eLon + 180) % 360);
     const M = fmtZodiac(mLon);

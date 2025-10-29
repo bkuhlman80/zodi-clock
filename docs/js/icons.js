@@ -2,6 +2,12 @@
 const NS = "http://www.w3.org/2000/svg";
 const XLINK = "http://www.w3.org/1999/xlink";
 
+function mkEl(tag, attrs = {}){
+  const el = document.createElementNS(NS, tag);
+  for (const [k,v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+}
+
 export function ensureDefs(svg){
   let defs = svg.querySelector("defs");
   if (!defs){
@@ -100,3 +106,47 @@ export function useEclipseBox(svg, x, y, sceneDiameter, color, variant="double-o
   return use;
 }
 
+export function ensurePhaseDefs(svg){
+  const defs = ensureDefs(svg);
+
+  if (!defs.querySelector("#phase-glow")){
+    const filter = mkEl("filter", { id: "phase-glow", x: "-50%", y: "-50%", width: "200%", height: "200%" });
+    filter.append(mkEl("feGaussianBlur", { stdDeviation: "1.6", result: "g" }));
+    const merge = mkEl("feMerge");
+    merge.append(mkEl("feMergeNode", { in: "g" }));
+    merge.append(mkEl("feMergeNode", { in: "SourceGraphic" }));
+    filter.append(merge);
+    defs.appendChild(filter);
+  }
+
+  const ensureSymbol = (id, build) => {
+    if (defs.querySelector(`#${id}`)) return;
+    const sym = mkEl("symbol", { id, viewBox: "0 0 100 100" });
+    sym.append(mkEl("circle", { cx: "50", cy: "50", r: "50", fill: "black" }));
+    build(sym);
+    defs.appendChild(sym);
+  };
+
+  ensureSymbol("phase-new", () => {});
+
+  ensureSymbol("phase-full", sym => {
+    sym.append(mkEl("circle", { cx: "50", cy: "50", r: "50", fill: "white" }));
+  });
+
+  ensureSymbol("phase-quarter", sym => {
+    const d = "M50 0 A50 50 0 0 1 50 100 L50 0 Z";
+    sym.append(mkEl("path", { d, fill: "white" }));
+  });
+
+  ensureSymbol("phase-crescent", sym => {
+    const d = "M50 0 A50 50 0 1 1 49.9 0 Z M65 0 A35 50 0 1 0 65 100 Z";
+    sym.append(mkEl("path", { d, fill: "white", "fill-rule": "evenodd" }));
+  });
+
+  ensureSymbol("phase-gibbous", sym => {
+    const d = "M50 0 A50 50 0 1 1 49.9 0 Z M35 0 A35 50 0 1 0 35 100 Z";
+    sym.append(mkEl("path", { d, fill: "white", "fill-rule": "evenodd" }));
+  });
+
+  return defs;
+}
